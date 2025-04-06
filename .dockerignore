@@ -1,0 +1,7 @@
+.git/
+.github/
+./scripts
+.idea/
+
+build/
+.DS_Store
