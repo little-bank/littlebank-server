@@ -5,6 +5,10 @@ on:
     branches: [ develop ]
     types: [ closed ]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-deploy:
     if: github.event.pull_request.merged == true
