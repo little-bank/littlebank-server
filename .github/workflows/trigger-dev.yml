@@ -21,7 +21,9 @@ jobs:
           distribution: 'temurin'
 
       - name: Generate application.yml
-        run: echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > ./src/main/resources/application.yml
+        run: |
+          mkdir -p ./src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > ./src/main/resources/application.yml
 
       - name: Generate application-dev.yml
         run: echo "${{ secrets.APPLICATION_DEV_YML }}" | base64 --decode > ./src/main/resources/application-dev.yml
