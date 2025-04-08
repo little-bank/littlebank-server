@@ -48,8 +48,8 @@ jobs:
       - name: Trigger CodeDeploy
         run: |
           aws deploy create-deployment \
-            --application-name littlebank \
-            --deployment-group-name develop \
+            --application-name littlebank-deploy \
+            --deployment-group-name springboot-deploy-group \
             --file-exists-behavior OVERWRITE \
             --s3-location bucket=${{ secrets.S3_BUCKET_NAME_DEV }},bundleType=zip,key=deploy/${{ github.sha }}.zip \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
