@@ -3,7 +3,6 @@
 REPOSITORY=/home/ubuntu/
 cd $REPOSITORY/littlebank
 
-# 사용할 YML 결정
 YML="docker-compose.prod.yml"
 if [ -f "docker-compose.dev.yml" ]; then
   YML="docker-compose.dev.yml"
@@ -15,11 +14,8 @@ if docker compose -f $YML ps | grep Up &> /dev/null; then
   docker compose -f $YML down
 fi
 
-echo "> Pulling images (if needed)..."
-docker compose -f $YML pull
+echo "> Building docker images if needed..."
+docker compose -f $YML build
 
-echo "> Building changed docker images only..."
-docker compose -f $YML build --parallel --no-cache=false
-
-echo "> Starting docker services..."
-docker compose -f $YML up -d --remove-orphans
+echo "> Starting new docker services..."
+docker compose -f $YML up -d
