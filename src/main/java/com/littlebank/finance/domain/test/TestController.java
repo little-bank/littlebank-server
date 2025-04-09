@@ -10,11 +10,6 @@ public class TestController {
 
     @GetMapping()
     public String test() {
-        return "test";
-    }
-
-    @GetMapping()
-    public String test2() {
-        return "test2";
+        return "배포 자동화 테스트 성공";
     }
 }
