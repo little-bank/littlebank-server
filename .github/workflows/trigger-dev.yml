@@ -1,0 +1,55 @@
+name: Deploy - Develop
+
+on:
+  pull_request:
+    branches: [ develop ]
+    types: [ closed ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Generate application.yml
+        run: |
+          mkdir -p ./src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > ./src/main/resources/application.yml
+      - name: Generate application-dev.yml
+        run: echo "${{ secrets.APPLICATION_DEV_YML }}" | base64 --decode > ./src/main/resources/application-dev.yml
+
+      - name: Zip project files
+        run: zip -r ./${{ github.sha }}.zip .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload to S3
+        run: aws s3 cp --region ${{ secrets.AWS_REGION }} ./${{ github.sha }}.zip s3://${{ secrets.S3_BUCKET_NAME_DEV }}/deploy/${{ github.sha }}.zip
+
+      - name: Trigger CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name littlebank-deploy \
+            --deployment-group-name env-dev \
+            --file-exists-behavior OVERWRITE \
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME_DEV }},bundleType=zip,key=deploy/${{ github.sha }}.zip \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --region ${{ secrets.AWS_REGION }}
