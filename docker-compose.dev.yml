@@ -1,0 +1,13 @@
+services:
+
+  spring_boot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jangtaehyeon/littlebank:latest
+    container_name: littlebank_dev
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    restart: always

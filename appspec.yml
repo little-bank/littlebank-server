@@ -1,0 +1,25 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/ubuntu/littlebank
+file_exists_behavior: OVERWRITE
+
+permissions:
+  - object: /home/ubuntu/littlebank
+    owner: ubuntu
+    mode: 755
+    type:
+      - file
+
+hooks:
+  BeforeInstall:
+    - location: scripts/install-docker.sh
+      timeout: 300
+      runas: root
+
+  AfterInstall:
+    - location: scripts/after-deploy.sh
+      timeout: 2000
+      runas: ubuntu
