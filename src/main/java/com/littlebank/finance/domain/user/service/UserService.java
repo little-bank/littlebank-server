@@ -30,4 +30,8 @@ public class UserService {
             throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
         }
     }
+    public User findById(Long id){
+        return userRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
 }
