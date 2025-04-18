@@ -10,8 +10,12 @@ public enum ErrorCode {
     HANDLE_ACCESS_DENIED(403, "C006", "Access is Denied"),
 
     // User
-    EMAIL_DUPLICATED(500, "U001", "중복된 이메일이 존재합니다"),
-    USER_NOT_FOUND(404,"U002","해당 유저를 찾을 수 없습니다.");
+    USER_NOT_FOUND(500, "U001", "유저가 존재하지 않습니다"),
+    EMAIL_DUPLICATED(500, "U002", "중복된 이메일이 존재합니다"),
+
+    // Auth
+    PASSWORD_NOT_MATCHED(500, "A001", "비밀번호가 일치하지 않습니다");
+
     private final String code;
     private final String message;
     private final int status;

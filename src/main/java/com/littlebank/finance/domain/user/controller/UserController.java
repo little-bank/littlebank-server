@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/public/signup")
+    @Operation(summary = "회원가입 API")
     @SecurityRequirements()
-    @Operation(summary = "회원가입 API", description = "설명")
+    @PostMapping("/public/signup")
     public ResponseEntity<SignupResponse> saveUser(
             @RequestBody @Valid SignupRequest request
     ) {
