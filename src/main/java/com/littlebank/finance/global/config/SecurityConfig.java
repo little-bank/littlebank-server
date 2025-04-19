@@ -36,7 +36,7 @@ public class SecurityConfig {
             // swagger 관련
             "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs", "/v3/api-docs.yaml",
             // api 관련
-            "/api-admin/*/public/**", "/api-user/*/public/**",
+            "/api-admin/*/public/**", "/api-user/*/public/**", "/ws-test.html", "/ws-chat/**"
     };
 
     @Bean

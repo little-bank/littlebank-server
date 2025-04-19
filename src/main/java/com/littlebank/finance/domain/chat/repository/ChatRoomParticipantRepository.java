@@ -12,5 +12,5 @@ public interface ChatRoomParticipantRepository extends JpaRepository<ChatRoomPar
             "FROM ChatRoomParticipant p WHERE p.chatRoom.id=:roomId AND p.user.id=:userId")
     boolean existsByRoomIdAndUserId(@Param("roomId") String roomId,
                                     @Param("userId") String userId);
-
+    void deleteAllByChatRoomId(String roomId);
 }
