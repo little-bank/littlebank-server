@@ -1,0 +1,19 @@
+### 회원가입 요청
+POST http://localhost:8080/api-user/user/public/signup
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "Test1234!",
+  "name": "홍길동",
+  "phone": "01012345678",
+  "rrn": "010101",
+  "bankName": "하나은행",
+  "bankCode": "081",
+  "bankAccount": "12345678901234",
+  "profileImageUrl": "https://example.com/profile.jpg",
+  "balance": 0,
+  "role": "CHILD",
+  "authority": "USER",
+  "isSubscribe": false
+}

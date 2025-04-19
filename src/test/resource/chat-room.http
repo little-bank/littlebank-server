@@ -1,0 +1,11 @@
+### 채팅방 생성 테스트
+POST http://localhost:8080/chat-room
+Content-Type: application/json
+
+{
+  "name": "우리들의 비밀방",
+  "participantIds": [1, 2]
+}
+
+### 채팅방 전체 조회
+GET http://localhost:8080/chat-room
