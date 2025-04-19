@@ -52,6 +52,13 @@ public class UserService {
         return UserInfoResponse.of(user);
     }
 
+    public void deleteUser(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+        userRepository.deleteById(user.getId());
+    }
+
     private void verifyDuplicatedEmail(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new UserException(ErrorCode.EMAIL_DUPLICATED);
