@@ -34,8 +34,7 @@ public class JwtFilter extends GenericFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        //String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        String bearerToken = request.getHeader("Authorization");
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         System.out.println("[JwtFilter] Authorization header: " + bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);

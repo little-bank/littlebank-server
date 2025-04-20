@@ -1,6 +1,5 @@
 package com.littlebank.finance.global.config;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -10,15 +9,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@SecurityScheme(
-        name = "BearerAuth",
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT"
-)
+
 public class SwaggerConfig {
 
-    private static final String SECURITY_SCHEME_NAME = "BearerAuth";
+    private static final String SECURITY_SCHEME_NAME = "JWT";
 
     @Bean
     public OpenAPI openAPI() {
@@ -55,7 +49,7 @@ public class SwaggerConfig {
                 SECURITY_SCHEME_NAME,
                 new io.swagger.v3.oas.models.security.SecurityScheme()
                         .name(SECURITY_SCHEME_NAME)
-                        .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                        .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT")
         );

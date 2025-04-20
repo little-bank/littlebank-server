@@ -5,7 +5,10 @@ import com.littlebank.finance.domain.chat.dto.ChatMessageResponse;
 import com.littlebank.finance.domain.chat.entity.ChatMessage;
 import com.littlebank.finance.domain.chat.service.ChatService;
 import com.littlebank.finance.domain.user.domain.User;
+import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.service.UserService;
+import com.littlebank.finance.global.error.exception.BusinessException;
+import com.littlebank.finance.global.error.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,21 +29,20 @@ import java.security.Principal;
 public class ChatMessageController {
     private final ChatService chatService;
     private final UserService userService;
-    public ChatMessageController(ChatService chatService, UserService userService) {
+    private final UserRepository userRepository;
+    public ChatMessageController(ChatService chatService, UserService userService, UserRepository userRepository) {
         this.chatService = chatService;
         this.userService = userService;
+        this.userRepository=userRepository;
     }
 
     @MessageMapping("/api-user/chat.send.{roomId}")
     @SendTo("/topic/chat/{roomId}")
     public ChatMessageResponse sendMessage(@DestinationVariable String roomId, @Payload ChatMessageDto dto, Principal principal) {
         //방 입장 권한 체크
-        //User sender = userService.findById(dto.getSenderId());
-        //User receiver = userService.findById(dto.getReceiverId());
-        //Long senderId=Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        //Long senderId=Long.valueOf(principal.getName());
         String email = principal.getName();
-        User user = userService.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
         Long senderId = user.getId();
         if (!chatService.isParticipant( roomId, senderId.toString())) {
             throw new RuntimeException("이 채팅방 참여자가 아닙니다.");
