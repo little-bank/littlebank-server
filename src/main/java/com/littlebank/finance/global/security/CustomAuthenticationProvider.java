@@ -1,6 +1,6 @@
 package com.littlebank.finance.global.security;
 
-import com.littlebank.finance.global.error.exception.BusinessException;
+import com.littlebank.finance.domain.user.excption.UserException;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,9 +22,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
-        if (!(passwordEncoder.matches(password, userDetails.getPassword())
-                || userDetails.getPassword().equals(password)) ) {
-            throw new BusinessException(ErrorCode.PASSWORD_NOT_MATCHED);
+        if (password != null
+                && !(
+                        passwordEncoder.matches(password, userDetails.getPassword())
+                                || userDetails.getPassword().equals(password)
+        )) {
+            throw new UserException(ErrorCode.PASSWORD_NOT_MATCHED);
         }
 
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());

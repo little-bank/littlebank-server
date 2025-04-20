@@ -24,7 +24,7 @@ public class SignupRequest {
     private String password;
 
     @NotBlank
-    @Schema(description = "이름", example = "홍길")
+    @Schema(description = "이름", example = "김동규")
     private String name;
 
     @Schema(description = "핸드폰 번호", example = "01012345678")
@@ -43,9 +43,6 @@ public class SignupRequest {
     @Schema(description = "은행 교유 번호", example = "090")
     private String bankCode;
 
-    @Schema(description = "s3 이미지 업로드 경로")
-    private String profileImageUrl;
-
     @Schema(description = "유저 역할", example = "PARENT or CHILD or TEACHER")
     private UserRole role;
 
@@ -59,7 +56,6 @@ public class SignupRequest {
                 .bankName(bankName)
                 .bankAccount(bankAccount)
                 .bankCode(bankCode)
-                .profileImageUrl(bankAccount)
                 .role(role)
                 .authority(authority)
                 .build();

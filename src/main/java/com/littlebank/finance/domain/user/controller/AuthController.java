@@ -1,6 +1,7 @@
 package com.littlebank.finance.domain.user.controller;
 
 import com.littlebank.finance.domain.user.dto.request.LoginRequest;
+import com.littlebank.finance.domain.user.dto.request.SocialLoginRequest;
 import com.littlebank.finance.domain.user.dto.response.LoginResponse;
 import com.littlebank.finance.domain.user.service.AuthService;
 import com.littlebank.finance.global.jwt.dto.TokenDto;
@@ -18,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api-user/user")
+@RequestMapping("/api-user/auth")
 @RequiredArgsConstructor
-@Tag(name = "AUTH")
+@Tag(name = "Auth")
 public class AuthController {
     private final AuthService authService;
     private final CookieUtil cookieUtil;
@@ -32,6 +33,18 @@ public class AuthController {
             @RequestBody @Valid LoginRequest request
     ) {
         TokenDto tokenDto = authService.login(request);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookieUtil.getCookie(tokenDto.getRefreshToken()).toString())
+                .body(LoginResponse.of(tokenDto.getAccessToken()));
+    }
+
+    @Operation(summary = "카카오 API 로그인", description = "카카오 인증 토큰(accessToken)을 담아서 요청")
+    @SecurityRequirements()
+    @PostMapping("/public/kakao/login")
+    public ResponseEntity<LoginResponse> kakaoLogin(
+            @RequestBody @Valid SocialLoginRequest request
+    ) {
+        TokenDto tokenDto = authService.kakaoLogin(request);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookieUtil.getCookie(tokenDto.getRefreshToken()).toString())
                 .body(LoginResponse.of(tokenDto.getAccessToken()));

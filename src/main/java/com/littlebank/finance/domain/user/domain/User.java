@@ -25,7 +25,7 @@ public class User extends BaseEntity {
     @Column(length = 50, unique = true, nullable = false)
     private String email;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100)
     private String password;
 
     @Column(length = 20, nullable = false)
@@ -34,7 +34,7 @@ public class User extends BaseEntity {
     @Column(length = 11)
     private String phone;
 
-    @Column(length = 6, nullable = false)
+    @Column(length = 6)
     private String rrn;
 
     @Column(length = 10)
@@ -46,14 +46,13 @@ public class User extends BaseEntity {
     @Column(length = 20)
     private String bankAccount;
 
-    @Column(length = 100)
-    private String profileImageUrl;
+    @Column(length = 150)
+    private String profileImagePath;
 
     @Column(name = "balance")
     private Integer balance;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private UserRole role;
 
     @Enumerated(EnumType.STRING)
@@ -69,7 +68,7 @@ public class User extends BaseEntity {
     @Builder
     public User(
             Long id, String email, String password, String name, String phone, String rrn, String bankName,
-            String bankCode, String bankAccount, String profileImageUrl, Integer balance, UserRole role,
+            String bankCode, String bankAccount, String profileImagePath, Integer balance, UserRole role,
             Authority authority, Boolean isSubscribe, LocalDateTime lastLoginAt, Boolean isDeleted
     ) {
         super(isDeleted);
@@ -82,7 +81,7 @@ public class User extends BaseEntity {
         this.bankName = bankName;
         this.bankCode = bankCode;
         this.bankAccount = bankAccount;
-        this.profileImageUrl = profileImageUrl;
+        this.profileImagePath = profileImagePath;
         this.balance = balance == null ? 0 : balance;
         this.role = role;
         this.authority = authority;
@@ -92,5 +91,17 @@ public class User extends BaseEntity {
 
     public void encodePassword(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(this.password);
+    }
+
+    public void updateProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
+    }
+
+    public void update(User updateInfo) {
+        this.email = updateInfo.getEmail();
+        this.name = updateInfo.getName();
+        this.bankName = updateInfo.getBankName();
+        this.bankAccount = updateInfo.getBankAccount();
+        this.bankCode = updateInfo.getBankCode();
     }
 }
