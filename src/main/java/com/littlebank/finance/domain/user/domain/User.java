@@ -71,8 +71,8 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> senderMessages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatMessage> receiverMessages = new ArrayList<>();
+//    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ChatMessage> receiverMessages = new ArrayList<>();
 
 
     @Builder

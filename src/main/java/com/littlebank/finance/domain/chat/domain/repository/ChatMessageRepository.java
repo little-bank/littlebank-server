@@ -17,10 +17,10 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage,Long> {
             "(:cursor IS NULL OR c.id<:cursor) ORDER BY c.id DESC")
     List<ChatMessage> findMessages(@Param("roomId") String roomId, @Param("cursor") Long cursor, Pageable pageable);
     //읽음 처리
-    @Modifying
-    @Transactional
-    @Query("UPDATE ChatMessage c SET c.isRead=true WHERE c.roomId=:roomId " +
-            "AND c.receiver=:receiver AND c.isRead=false")
-    void markAsRead(@Param("roomId") String roomId, @Param("receiver") String receiver);
+//    @Modifying
+//    @Transactional
+//    @Query("UPDATE ChatMessage c SET c.isRead=true WHERE c.roomId=:roomId " +
+//            "AND c.receiver=:receiver AND c.isRead=false")
+//    void markAsRead(@Param("roomId") String roomId, @Param("receiver") String receiver);
 
 }

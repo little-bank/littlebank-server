@@ -21,8 +21,9 @@ public enum ErrorCode {
     INVALID_MIMETYPE(500, "I001", "유효하지 않은 mimetype 입니다"),
 
     // Chat
-    CHAT_ROOM_NOT_FOUND(404,"C001","채팅방이 존재하지 않습니다"),
-    FORBIDDEN_CHAT_DELETE(403,"C002","채팅방을 삭제할 수 없습니다");
+    CHAT_ROOM_NOT_FOUND(404,"C0H01","채팅방이 존재하지 않습니다"),
+    FORBIDDEN_CHAT_DELETE(403,"CH002","채팅방을 삭제할 수 없습니다"),
+    MESSAGE_NOT_FOUND(404, "CH003", "메세지를 찾을 수 없습니다");
 
     private final String code;
     private final String message;

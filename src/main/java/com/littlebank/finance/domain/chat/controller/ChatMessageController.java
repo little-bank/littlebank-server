@@ -1,8 +1,11 @@
 package com.littlebank.finance.domain.chat.controller;
 
 import com.littlebank.finance.domain.chat.dto.request.ChatMessageDto;
+import com.littlebank.finance.domain.chat.dto.response.ChatMessageResponse;
+import com.littlebank.finance.domain.chat.dto.response.ReadMessageDto;
 import com.littlebank.finance.domain.chat.exception.ChatException;
 import com.littlebank.finance.domain.chat.service.ChatService;
+import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,19 +32,44 @@ import java.security.Principal;
 public class ChatMessageController {
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
+
     @MessageMapping("/chat.send.{roomId}")
     public void sendMessage(@DestinationVariable String roomId, @Payload ChatMessageDto dto,
-                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+                            Principal principal) {
         log.info("💬 [서버 도착] @MessageMapping 호출됨: roomId={}", roomId);
-        Long tokenUserId= customUserDetails.getId();
+
+        if (principal == null) {
+            throw new ChatException(ErrorCode.HANDLE_ACCESS_DENIED);
+        }
+
+        String email = principal.getName();  // 여기서 email 가져오기
+        Long tokenUserId = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_FOUND))
+                .getId();
+
         if (dto.getSenderId() == null || !dto.getSenderId().equals(tokenUserId)) {
             log.warn("🚫 인증된 사용자 ID와 메시지의 senderId 불일치: tokenUserId={}, dtoSenderId={}", tokenUserId, dto.getSenderId());
             throw new ChatException(ErrorCode.HANDLE_ACCESS_DENIED);
-
         }
-        chatService.handleChatMessage(roomId, dto, customUserDetails.getUsername());
-        messagingTemplate.convertAndSend("/topic/chat/" + roomId, dto);
-        log.info("📢 메시지 전송 완료: roomId={}", roomId);
+        ChatMessageResponse response = chatService.handleChatMessage(roomId, dto, email);
 
+    //    chatService.handleChatMessage(roomId, dto, email);
+        messagingTemplate.convertAndSend("/topic/chat/" + roomId, response);
+        log.info("📢 메시지 전송 완료: roomId={}", roomId);
+    }
+
+    @MessageMapping("/chat.read.{roomId}")
+    public void readMessage(@DestinationVariable String roomId, @Payload ReadMessageDto dto, Principal principal) {
+        if (principal == null) {
+            throw new ChatException(ErrorCode.HANDLE_ACCESS_DENIED);
+        }
+
+        String email = principal.getName();
+        Long readerId = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_FOUND))
+                .getId();
+
+        chatService.markAsRead(dto.getMessageId(), readerId, roomId);
     }
 }

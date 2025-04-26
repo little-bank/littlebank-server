@@ -32,14 +32,17 @@ public class ChatMessageResponse  {
     @Schema(description = "메시지 생성 시간", example = "2024-04-23T13:00:00")
     private LocalDateTime createdAt;
 
+    @Schema(description = "아직 읽지 않은 사람 수", example = "1")
+    private Integer unreadCount;
 
-    public static ChatMessageResponse from(ChatMessage message) {
+    public static ChatMessageResponse from(ChatMessage message, int unreadCount) {
         return ChatMessageResponse.builder()
                 .id(message.getId())
                 .sender(message.getSender().getName())
                 .message(message.getMessage())
                 .type(message.getType().name())
                 .isRead(message.isRead())
+                .unreadCount(unreadCount)
                 .build();
     }
 }
