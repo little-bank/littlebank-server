@@ -2,8 +2,10 @@ package com.littlebank.finance.domain.chat.controller;
 
 import com.littlebank.finance.domain.chat.dto.request.ChatRoomRequest;
 import com.littlebank.finance.domain.chat.domain.ChatRoom;
+import com.littlebank.finance.domain.chat.dto.response.ChatRoomSummary;
 import com.littlebank.finance.domain.chat.service.ChatRoomService;
 
+import com.littlebank.finance.domain.chat.service.ChatService;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,5 +65,14 @@ public class ChatRoomController {
     public ResponseEntity<Void> deleteRoom(@PathVariable String roomId, @AuthenticationPrincipal CustomUserDetails currentUser) {
         chatRoomService.deleteRoom(roomId, currentUser.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    private final ChatService chatService;
+
+    @Operation(summary = "채팅방 목록 API", description = "참여한 채팅방 목록 조회")
+    @GetMapping("/my-chat-rooms")
+    public List<ChatRoomSummary> getMyChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
+        return chatService.getChatRoomsForUser(userId);
     }
 }

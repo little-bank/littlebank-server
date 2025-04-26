@@ -1,10 +1,13 @@
 package com.littlebank.finance.domain.chat.service;
 
+import com.littlebank.finance.domain.chat.domain.ChatRoom;
+import com.littlebank.finance.domain.chat.domain.repository.ChatRoomRepository;
 import com.littlebank.finance.domain.chat.dto.request.ChatMessageDto;
 import com.littlebank.finance.domain.chat.dto.response.ChatMessageResponse;
 import com.littlebank.finance.domain.chat.domain.ChatMessage;
 import com.littlebank.finance.domain.chat.domain.repository.ChatMessageRepository;
 import com.littlebank.finance.domain.chat.domain.repository.ChatRoomParticipantRepository;
+import com.littlebank.finance.domain.chat.dto.response.ChatRoomSummary;
 import com.littlebank.finance.domain.chat.exception.ChatException;
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
@@ -17,6 +20,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,6 +30,7 @@ public class ChatService {
     private final ChatRoomParticipantRepository chatRoomParticipantRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatRoomRepository chatRoomRepository;
 
     public void handleChatMessage(String roomId, ChatMessageDto dto, String senderEmail) {
         // 유저 정보 조회
@@ -69,7 +74,6 @@ public class ChatService {
                 ChatMessage message = ChatMessage.builder()
                         .roomId(dto.getRoomId())
                         .sender(sender)
-                        .receiver(participant) // 저장은 receiver와 함께
                         .message(dto.getMessage())
                         .type(dto.getType())
                         .isRead(false)
@@ -84,5 +88,36 @@ public class ChatService {
         return chatRoomParticipantRepository.existsByRoomIdAndUserId(roomId, userId);
     }
 
+    public List<ChatRoomSummary> getChatRoomsForUser(Long userId) {
+        List<String> roomIds = chatRoomParticipantRepository.findRoomIdsByUserId(userId);
 
+        return roomIds.stream()
+                .map(roomId -> {
+                    ChatRoom room = chatRoomRepository.findById(roomId)
+                            .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다. roomId: " + roomId));
+
+                    ChatMessage lastMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedDateDesc(roomId);
+
+                    // 읽지 않은 메세지 수 (stream으로 필터링)
+                    List<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId);
+                    Long unreadCount = messages.stream()
+                            .filter(msg -> !msg.getReadUserIds().contains(userId))
+                            .count();
+
+                    return new ChatRoomSummary(
+                            room.getId(),
+                            room.getName(),
+                            lastMessage != null ? lastMessage.getMessage() : "",
+                            lastMessage != null ? lastMessage.getCreatedDate() : null,
+                            unreadCount
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_FOUND))
+                .getId();
+    }
 }

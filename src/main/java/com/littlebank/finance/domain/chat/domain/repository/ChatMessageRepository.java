@@ -23,4 +23,11 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage,Long> {
             "AND c.receiver=:receiver AND c.isRead=false")
     void markAsRead(@Param("roomId") String roomId, @Param("receiver") String receiver);
 
+
+    ChatMessage findTopByRoomIdOrderByCreatedDateDesc(String roomId);
+    List<ChatMessage> findByRoomId(String roomId);
+
+    @Query("SELECT COUNT(cm) FROM ChatMessage cm WHERE cm.roomId = :roomId AND :userId NOT MEMBER OF cm.readUserIds")
+    Long countUnreadMessagesByRoomIdAndUserId(@Param("roomId") String roomId, @Param("userId") Long userId);
+
 }

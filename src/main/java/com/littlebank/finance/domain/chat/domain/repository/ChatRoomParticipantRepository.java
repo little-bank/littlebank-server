@@ -19,8 +19,9 @@ public interface ChatRoomParticipantRepository extends JpaRepository<ChatRoomPar
     @Query("SELECT crp.user FROM ChatRoomParticipant crp WHERE crp.chatRoom.id = :roomId")
     List<User> findUsersByRoomId(@Param("roomId") String roomId);
 
-    Set<Long> user(User user);
+    //Set<Long> user(User user);
 
-    @Query("SELECT crp.chatRoom.id FROM ChatRoomParticipant crp WHERE crp.user.id IN :userIds")
-    List<String> findRoomIdsByUserIds(@Param("userIds") Set<Long> userIds);
+    @Query("SELECT crp.chatRoom.id FROM ChatRoomParticipant crp WHERE crp.user.id = :userIds")
+    List<String> findRoomIdsByUserId(@Param("userIds") Long userId);
+
 }

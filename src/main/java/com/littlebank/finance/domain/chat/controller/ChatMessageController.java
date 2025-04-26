@@ -29,19 +29,31 @@ import java.security.Principal;
 public class ChatMessageController {
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
+
+
     @MessageMapping("/chat.send.{roomId}")
-    public void sendMessage(@DestinationVariable String roomId, @Payload ChatMessageDto dto,
-                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public void sendMessage(@DestinationVariable String roomId, @Payload ChatMessageDto dto, Principal principal) {
         log.info("💬 [서버 도착] @MessageMapping 호출됨: roomId={}", roomId);
-        Long tokenUserId= customUserDetails.getId();
+
+        if (principal == null) {
+            log.warn("🚫 Principal이 null입니다. 인증되지 않은 사용자");
+            throw new ChatException(ErrorCode.HANDLE_ACCESS_DENIED);
+        }
+
+        String email = principal.getName(); // 로그인한 사람 email
+        log.info("✅ Principal 이메일: {}", email);
+
+        // 이메일로 DB 조회해서 tokenUserId 가져오기
+        Long tokenUserId = chatService.getUserIdByEmail(email);
+
         if (dto.getSenderId() == null || !dto.getSenderId().equals(tokenUserId)) {
             log.warn("🚫 인증된 사용자 ID와 메시지의 senderId 불일치: tokenUserId={}, dtoSenderId={}", tokenUserId, dto.getSenderId());
             throw new ChatException(ErrorCode.HANDLE_ACCESS_DENIED);
-
         }
-        chatService.handleChatMessage(roomId, dto, customUserDetails.getUsername());
+        dto.setSenderId(tokenUserId); // 서버에서 강제 세팅
+
+        chatService.handleChatMessage(roomId, dto, email);
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, dto);
         log.info("📢 메시지 전송 완료: roomId={}", roomId);
-
     }
 }

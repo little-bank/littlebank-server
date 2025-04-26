@@ -5,6 +5,8 @@ import com.littlebank.finance.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "chat_message")
@@ -37,6 +39,10 @@ public class ChatMessage extends BaseEntity {
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
 
+    @ElementCollection
+    @CollectionTable(name = "chat_message_read", joinColumns = @JoinColumn(name = "message_id"))
+    @Column(name = "user_id")
+    private Set<Long> readUserIds = new HashSet<>();
 
     @Builder
     public ChatMessage(String roomId, User sender, User receiver, String message, MessageType type, boolean isRead) {
@@ -47,4 +53,13 @@ public class ChatMessage extends BaseEntity {
         this.type = type;
         this.isRead = isRead;
     }
+//
+//    public void markAsRead(Long userId) {
+//        this.readUserIds.add(userId);
+//    }
+//
+//    @Builder
+//    public Set<Long> getReadUserIds() {
+//        return readUserIds;
+//    }
 }
