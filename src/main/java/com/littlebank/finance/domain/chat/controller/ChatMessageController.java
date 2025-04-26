@@ -44,9 +44,7 @@ public class ChatMessageController {
         }
 
         String email = principal.getName();  // 여기서 email 가져오기
-        Long tokenUserId = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_FOUND))
-                .getId();
+        Long tokenUserId = chatService.getUserIdByEmail(email);
 
         if (dto.getSenderId() == null || !dto.getSenderId().equals(tokenUserId)) {
             log.warn("🚫 인증된 사용자 ID와 메시지의 senderId 불일치: tokenUserId={}, dtoSenderId={}", tokenUserId, dto.getSenderId());
@@ -61,15 +59,18 @@ public class ChatMessageController {
 
     @MessageMapping("/chat.read.{roomId}")
     public void readMessage(@DestinationVariable String roomId, @Payload ReadMessageDto dto, Principal principal) {
+        log.info("📖 [읽음 처리] @MessageMapping 호출됨: roomId={}", roomId);
+
         if (principal == null) {
             throw new ChatException(ErrorCode.HANDLE_ACCESS_DENIED);
         }
 
         String email = principal.getName();
-        Long readerId = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_FOUND))
-                .getId();
+        Long readerId = chatService.getUserIdByEmail(email);
+
 
         chatService.markAsRead(dto.getMessageId(), readerId, roomId);
+        log.info("✅ 읽음 처리 완료: messageId={}, readerId={}", dto.getMessageId(), readerId);
+
     }
 }

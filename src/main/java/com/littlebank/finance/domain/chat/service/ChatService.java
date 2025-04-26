@@ -49,6 +49,7 @@ public class ChatService {
                 .message(dto.getMessage())
                 .type(dto.getType())
                 .build();
+
         message.markAsRead(senderId);
         chatMessageRepository.save(message);
 
@@ -57,29 +58,6 @@ public class ChatService {
 
         return ChatMessageResponse.from(message, participantCount - 1); // 본인 제외
     }
-
-    private List<ChatMessage> sendToParticipants(ChatMessageDto dto, User sender) {
-        List<User> participants = chatRoomParticipantRepository.findUsersByRoomId(dto.getRoomId());
-        List<ChatMessage> savedMessages = new ArrayList<>();
-
-        for (User participant : participants) {
-            if (!participant.getId().equals(sender.getId())) {
-                ChatMessage message = ChatMessage.builder()
-                        .roomId(dto.getRoomId())
-                        .sender(sender)
-                        //.receiver(participant) // 꼭 receiver 설정!
-                        .message(dto.getMessage())
-                        .type(dto.getType())
-                        .isRead(false)
-                        .build();
-
-                savedMessages.add(chatMessageRepository.save(message));
-            }
-        }
-
-        return savedMessages;
-    }
-
 
     private boolean isParticipant(String roomId, Long userId) {
         return chatRoomParticipantRepository.existsByRoomIdAndUserId(roomId, userId);
@@ -102,4 +80,8 @@ public class ChatService {
         }
     }
 
-}
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_FOUND))
+                .getId();
+    }}
