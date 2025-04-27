@@ -98,21 +98,31 @@ public class ChatService {
 
                     ChatMessage lastMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedDateDesc(roomId);
 
-                    // 읽지 않은 메세지 수 (stream으로 필터링)
-                    List<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId);
-                    Long unreadCount = messages.stream()
-                            .filter(msg -> !msg.getReadUserIds().contains(userId))
-                            .count();
+                    List<User> participants = chatRoomParticipantRepository.findUsersByRoomId(roomId);
 
-                    return new ChatRoomSummary(
-                            room.getId(),
-                            room.getName(),
-                            lastMessage != null ? lastMessage.getMessage() : "",
-                            lastMessage != null ? lastMessage.getCreatedDate() : null,
-                            unreadCount
-                    );
+                    // ⭐ 나를 제외한 다른 사람들의 프로필 사진 최대 4명만 추출
+                    List<String> profileImageUrls = participants.stream()
+                            .filter(user -> !user.getId().equals(userId)) // 나 제외
+                            .map(User::getProfileImageUrl)
+                            .limit(4) // 최대 4개까지만
+                            .toList();
+
+                    Long unreadCount = 0L;
+                    if (lastMessage != null) {
+                        int participantCount = participants.size();
+                        unreadCount = (long) (participantCount - lastMessage.getReadUserIds().size());
+                    }
+
+                    return ChatRoomSummary.builder()
+                            .roomId(room.getId())
+                            .roomName(room.getName())
+                            .lastMessage(lastMessage != null ? lastMessage.getMessage() : "")
+                            .lastMessageTime(lastMessage != null ? lastMessage.getCreatedDate() : null)
+                            .unreadCount(unreadCount)
+                            .profileImageUrls(profileImageUrls)
+                            .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Long getUserIdByEmail(String email) {

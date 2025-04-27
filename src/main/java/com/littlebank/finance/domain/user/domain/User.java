@@ -120,4 +120,10 @@ public class User extends BaseEntity {
         this.role = updateInfo.getRole();
     }
 
+    public String getProfileImageUrl() {
+        if (this.profileImagePath == null || this.profileImagePath.isBlank()) {
+            return "https://example.com/default-profile.png";
+        }
+        return this.profileImagePath;
+    }
 }
