@@ -5,12 +5,16 @@ import com.littlebank.finance.domain.chat.dto.response.ChatMessageResponse;
 import com.littlebank.finance.domain.chat.domain.ChatMessage;
 import com.littlebank.finance.domain.chat.domain.repository.ChatMessageRepository;
 import com.littlebank.finance.domain.chat.domain.repository.ChatRoomParticipantRepository;
+import com.littlebank.finance.domain.chat.dto.response.ReadMessageDto;
 import com.littlebank.finance.domain.chat.dto.response.UpdateUnreadCountResponse;
 import com.littlebank.finance.domain.chat.exception.ChatException;
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
+import com.littlebank.finance.domain.user.service.UserService;
 import com.littlebank.finance.global.error.exception.ErrorCode;
+import com.littlebank.finance.global.security.CustomUserDetails;
+import com.littlebank.finance.global.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,31 +22,31 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomParticipantRepository chatRoomParticipantRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public ChatMessageResponse handleChatMessage(String roomId, ChatMessageDto dto, String senderEmail) {
-        // 유저 조회
-        User sender = userRepository.findByEmail(senderEmail)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-
+    // 메세지 전송 (email, roomId, dto)
+    public ChatMessageResponse sendChatMessage(String email, String roomId, ChatMessageDto dto) {
+        User sender = userService.findUserByEmail(email);
         Long senderId = sender.getId();
 
-        // 채팅방 참여 여부 확인
+        validateSender(senderId, dto.getSenderId());
+
         if (!isParticipant(roomId, senderId)) {
             throw new ChatException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 메시지 저장
         ChatMessage message = ChatMessage.builder()
                 .roomId(roomId)
                 .sender(sender)
@@ -53,23 +57,21 @@ public class ChatService {
         message.markAsRead(senderId);
         chatMessageRepository.save(message);
 
-        // 참여자 수 가져오기
         int participantCount = chatRoomParticipantRepository.countParticipantsInRoom(roomId).intValue();
 
-        return ChatMessageResponse.from(message, participantCount - 1); // 본인 제외
+        return ChatMessageResponse.from(message, participantCount - 1);
     }
 
-    private boolean isParticipant(String roomId, Long userId) {
-        return chatRoomParticipantRepository.existsByRoomIdAndUserId(roomId, userId);
-    }
+    // 메세지 읽음 처리
+    public void readChatMessage(String email, Long messageId, String roomId) {
+        User reader = userService.findUserByEmail(email);
+        Long readerId = reader.getId();
 
-    @Transactional
-    public void markAsRead(Long messageId, Long readerId, String roomId) {
         ChatMessage message = chatMessageRepository.findById(messageId)
                 .orElseThrow(() -> new ChatException(ErrorCode.MESSAGE_NOT_FOUND));
 
         if (!message.getReadUserIds().contains(readerId)) {
-            message.markAsRead(readerId);
+            message.markAsRead(readerId); //
             chatMessageRepository.save(message);
 
             int participantCount = chatRoomParticipantRepository.countParticipantsInRoom(roomId).intValue();
@@ -80,8 +82,16 @@ public class ChatService {
         }
     }
 
-    public Long getUserIdByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_FOUND))
-                .getId();
-    }}
+    // senderId 검증
+    private void validateSender(Long tokenUserId, Long dtoSenderId) {
+        if (dtoSenderId == null || !tokenUserId.equals(dtoSenderId)) {
+            log.warn("🚫 인증된 사용자 ID와 메시지의 senderId 불일치: tokenUserId={}, dtoSenderId={}", tokenUserId, dtoSenderId);
+            throw new ChatException(ErrorCode.HANDLE_ACCESS_DENIED);
+        }
+    }
+
+    // 채팅방 참여 여부 확인
+    private boolean isParticipant(String roomId, Long userId) {
+        return chatRoomParticipantRepository.existsByRoomIdAndUserId(roomId, userId);
+    }
+}

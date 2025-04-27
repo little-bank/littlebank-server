@@ -75,4 +75,9 @@ public class UserService {
             throw new UserException(ErrorCode.EMAIL_DUPLICATED);
         }
     }
+
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+    }
 }
