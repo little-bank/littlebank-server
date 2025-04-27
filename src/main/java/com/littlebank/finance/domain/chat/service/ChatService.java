@@ -74,8 +74,19 @@ public class ChatService {
             message.markAsRead(readerId); //
             chatMessageRepository.save(message);
 
+            // 전체 인원 수
             int participantCount = chatRoomParticipantRepository.countParticipantsInRoom(roomId).intValue();
-            int unreadCount = participantCount - message.getReadUserIds().size();
+            // 메시지 보낸 사람 id
+            Long senderId = message.getSender().getId();
+            // 보낸 사람 제외
+            int totalTargetReaders = participantCount - 1;
+
+            // 보낸 사람 제외
+            int realReadUserCount = (int) message.getReadUserIds().stream()
+                    .filter(id -> !id.equals(senderId))
+                    .count();
+
+            int unreadCount = totalTargetReaders - realReadUserCount;
 
             messagingTemplate.convertAndSend("/topic/chat/read/" + roomId,
                     new UpdateUnreadCountResponse(message.getId(), unreadCount));
