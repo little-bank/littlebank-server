@@ -60,4 +60,12 @@ public class Feed extends BaseEntity {
         this.likeCount = likeCount;
         this.commentCount = commentCount;
     }
+
+    public void update(String title, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, String content) {
+        this.title = title;
+        this.gradeCategory = gradeCategory;
+        this.subjectCategory = subjectCategory;
+        this.tagCategory = tagCategory;
+        this.content = content;
+    }
 }

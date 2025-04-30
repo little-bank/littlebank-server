@@ -10,7 +10,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class FeedCreateRequestDto {
+public class FeedRequestDto {
     @NotBlank
     @Schema(description = "피드 제목", example = "ltbk 흥해라")
     private String title;
