@@ -71,4 +71,11 @@ public class FeedController {
         Page<FeedResponseDto> response = feedService.getFeedsByUser(customUserDetails.getId(), pageable);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "피드 상세 조회")
+    @GetMapping("/{feedId}")
+    public ResponseEntity<FeedResponseDto> getFeedDetail(@PathVariable Long feedId) {
+        FeedResponseDto response = feedService.getFeedDetail(feedId);
+        return ResponseEntity.ok(response);
+    }
 }

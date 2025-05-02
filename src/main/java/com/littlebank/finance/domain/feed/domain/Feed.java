@@ -69,5 +69,7 @@ public class Feed extends BaseEntity {
         this.content = content;
     }
 
-
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
 }

@@ -134,5 +134,11 @@ public class FeedService {
         });
     }
 
+    public FeedResponseDto getFeedDetail(Long feedId) {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new FeedException(ErrorCode.FEED_NOT_FOUND));
+        feed.increaseViewCount();
+        return FeedResponseDto.of(feed, feedImageRepository.findByFeed(feed));
+    }
 
 }
