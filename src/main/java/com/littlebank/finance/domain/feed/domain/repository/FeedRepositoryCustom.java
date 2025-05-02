@@ -4,15 +4,12 @@ import com.littlebank.finance.domain.feed.domain.Feed;
 import com.littlebank.finance.domain.feed.domain.GradeCategory;
 import com.littlebank.finance.domain.feed.domain.SubjectCategory;
 import com.littlebank.finance.domain.feed.domain.TagCategory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
-public interface FeedRepository extends JpaRepository<Feed, Long> {
-    List<Feed> findAllByOrderByCreatedDateDesc();
+public interface FeedRepositoryCustom {
+    Page<Feed> findAllByFilters(GradeCategory grade, SubjectCategory subject, TagCategory tag, Pageable pageable);
 
 }

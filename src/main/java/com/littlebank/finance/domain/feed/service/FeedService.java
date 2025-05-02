@@ -1,9 +1,9 @@
 package com.littlebank.finance.domain.feed.service;
 
-import com.littlebank.finance.domain.feed.domain.Feed;
-import com.littlebank.finance.domain.feed.domain.FeedImage;
+import com.littlebank.finance.domain.feed.domain.*;
 import com.littlebank.finance.domain.feed.domain.repository.FeedImageRepository;
 import com.littlebank.finance.domain.feed.domain.repository.FeedRepository;
+import com.littlebank.finance.domain.feed.domain.repository.FeedRepositoryCustom;
 import com.littlebank.finance.domain.feed.dto.request.FeedRequestDto;
 import com.littlebank.finance.domain.feed.dto.request.FeedImageRequestDto;
 import com.littlebank.finance.domain.feed.dto.response.FeedResponseDto;
@@ -13,6 +13,8 @@ import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,7 @@ public class FeedService {
     private final UserRepository userRepository;
     private final FeedRepository feedRepository;
     private final FeedImageRepository feedImageRepository;
-
+    private final FeedRepositoryCustom feedRepositoryCustom;
     public FeedResponseDto createFeed(Long userId, FeedRequestDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
@@ -113,5 +115,13 @@ public class FeedService {
             throw new FeedException(ErrorCode.USER_NOT_EQUAL);
         }
         feedRepository.delete(feed);
+    }
+
+    public Page<FeedResponseDto> getFeeds(GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
+        return feedRepositoryCustom.findAllByFilters(gradeCategory, subjectCategory, tagCategory, pageable)
+                .map(feed -> {
+                    List<FeedImage> images = feedImageRepository.findByFeed(feed);
+                    return FeedResponseDto.of(feed, images);
+                });
     }
 }
