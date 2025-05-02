@@ -39,7 +39,13 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                 builder.and(feed.subjectCategory.eq(subject));
             }
         }
-        if (tag != null) builder.and(feed.tagCategory.eq(tag));
+        if (tag != null) {
+            if (tag == TagCategory.ALL) {
+                builder.and(feed.tagCategory.in(TagCategory.STUDY_CERTIFICATION, TagCategory.HABIT_BUILDING, TagCategory.INFORMATION));
+            } else {
+                builder.and(feed.tagCategory.eq(tag));
+            }
+        }
 
         log("과목"+subject);
         List<Feed> result = queryFactory.selectFrom(feed)
