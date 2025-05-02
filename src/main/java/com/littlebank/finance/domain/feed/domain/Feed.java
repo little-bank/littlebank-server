@@ -68,4 +68,6 @@ public class Feed extends BaseEntity {
         this.tagCategory = tagCategory;
         this.content = content;
     }
+
+
 }

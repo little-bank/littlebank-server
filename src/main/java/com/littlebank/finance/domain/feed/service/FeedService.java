@@ -124,4 +124,15 @@ public class FeedService {
                     return FeedResponseDto.of(feed, images);
                 });
     }
+
+
+    public Page<FeedResponseDto> getFeedsByUser(Long userId, Pageable pageable) {
+        Page<Feed> feeds = feedRepository.findByUserId(userId, pageable);
+        return feeds.map(feed -> {
+            List<FeedImage> images = feedImageRepository.findByFeed(feed);
+            return FeedResponseDto.of(feed, images);
+        });
+    }
+
+
 }

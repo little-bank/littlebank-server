@@ -1,7 +1,6 @@
 package com.littlebank.finance.domain.feed.dto.response;
 
-import com.littlebank.finance.domain.feed.domain.Feed;
-import com.littlebank.finance.domain.feed.domain.FeedImage;
+import com.littlebank.finance.domain.feed.domain.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +15,9 @@ public class FeedResponseDto {
     private String title;
     private List<String> imageUrls;
     private String content;
+    private TagCategory tagCategory;
+    private SubjectCategory subjectCategory;
+    private GradeCategory gradeCategory;
     private String writerName;
     private String writerProfileImageUrl;
     private int viewCount;
@@ -31,6 +33,9 @@ public class FeedResponseDto {
                 .title(feed.getTitle())
                 .imageUrls(imageUrls)
                 .content(feed.getContent())
+                .tagCategory(feed.getTagCategory())
+                .subjectCategory(feed.getSubjectCategory())
+                .gradeCategory(feed.getGradeCategory())
                 .writerName(feed.getUser().getName())
                 .writerProfileImageUrl(feed.getUser().getProfileImagePath())
                 .viewCount(feed.getViewCount())

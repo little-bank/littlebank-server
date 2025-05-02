@@ -7,6 +7,8 @@ import com.littlebank.finance.domain.feed.dto.request.FeedRequestDto;
 import com.littlebank.finance.domain.feed.dto.response.FeedResponseDto;
 import com.littlebank.finance.domain.feed.service.FeedService;
 import com.littlebank.finance.global.security.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("api-user/feed")
 @RequiredArgsConstructor
+@Tag(name = "Feed")
 public class FeedController {
     private final FeedService feedService;
 
+    @Operation(summary = "피드 생성")
     @PostMapping("/create")
     public ResponseEntity<String> createFeed(@RequestBody FeedRequestDto request,
                                            @AuthenticationPrincipal CustomUserDetails currentUser){
@@ -29,7 +33,8 @@ public class FeedController {
         return ResponseEntity.ok("업로드 완료");
     }
 
-    @PutMapping("/{feedId}")
+    @Operation(summary = "피드 수정")
+    @PutMapping("/update/{feedId}")
     public ResponseEntity<FeedResponseDto> updateFeed(@PathVariable Long feedId,
                                                       @RequestBody FeedRequestDto request,
                                                       @AuthenticationPrincipal CustomUserDetails currentUser){
@@ -37,6 +42,7 @@ public class FeedController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "피드 삭제")
     @DeleteMapping("/{feedId}")
     public ResponseEntity<Void> deleteFeed(@PathVariable Long feedId,
                                            @AuthenticationPrincipal CustomUserDetails currentUser) {
@@ -44,6 +50,7 @@ public class FeedController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "피드 전체 목록 조회")
     @GetMapping
     public ResponseEntity<Page<FeedResponseDto>> getFeeds (
             @RequestParam(required = false) GradeCategory gradeCategory,
@@ -52,6 +59,16 @@ public class FeedController {
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable
             ) {
         Page<FeedResponseDto> response = feedService.getFeeds(gradeCategory, subjectCategory, tagCategory, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "내가 쓴 피드 조회")
+    @GetMapping("/my")
+    public ResponseEntity<Page<FeedResponseDto>> getMyFeeds (
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<FeedResponseDto> response = feedService.getFeedsByUser(customUserDetails.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 }
