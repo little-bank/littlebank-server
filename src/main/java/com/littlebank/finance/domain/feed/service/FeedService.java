@@ -2,11 +2,13 @@ package com.littlebank.finance.domain.feed.service;
 
 import com.littlebank.finance.domain.feed.domain.*;
 import com.littlebank.finance.domain.feed.domain.repository.FeedImageRepository;
+import com.littlebank.finance.domain.feed.domain.repository.FeedLikeRepository;
 import com.littlebank.finance.domain.feed.domain.repository.FeedRepository;
 import com.littlebank.finance.domain.feed.domain.repository.FeedRepositoryCustom;
 import com.littlebank.finance.domain.feed.dto.request.FeedRequestDto;
 import com.littlebank.finance.domain.feed.dto.request.FeedImageRequestDto;
 import com.littlebank.finance.domain.feed.dto.response.FeedResponseDto;
+import com.littlebank.finance.domain.feed.dto.response.FeedLikeResponseDto;
 import com.littlebank.finance.domain.feed.exception.FeedException;
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +34,8 @@ public class FeedService {
     private final FeedRepository feedRepository;
     private final FeedImageRepository feedImageRepository;
     private final FeedRepositoryCustom feedRepositoryCustom;
+    private final FeedLikeRepository feedLikeRepository;
+
     public FeedResponseDto createFeed(Long userId, FeedRequestDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
@@ -141,4 +146,37 @@ public class FeedService {
         return FeedResponseDto.of(feed, feedImageRepository.findByFeed(feed));
     }
 
+    public FeedLikeResponseDto likeFeed(Long userId, Long feedId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new FeedException(ErrorCode.FEED_NOT_FOUND));
+
+        boolean alreadyLiked = feedLikeRepository.findByFeedAndUser(feed, user).isPresent();
+        if (alreadyLiked) {
+            throw new FeedException(ErrorCode.ALREADY_LIKED);
+        }
+
+        FeedLike feedLike = FeedLike.builder()
+                .feed(feed)
+                .user(user)
+                .build();
+
+        feedLikeRepository.save(feedLike);
+        feed.increaseLikeCount();
+        return FeedLikeResponseDto.of(feedId, feed.getLikeCount(), true);
+    }
+
+    public FeedLikeResponseDto unlikeFeed(Long userId, Long feedId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new FeedException(ErrorCode.FEED_NOT_FOUND));
+        FeedLike feedLike = feedLikeRepository.findByFeedAndUser(feed, user)
+                .orElseThrow(() -> new FeedException(ErrorCode.LIKE_NOT_FOUND));
+
+        feedLikeRepository.delete(feedLike);
+        feed.decreaseLikeCount();
+        return FeedLikeResponseDto.of(feedId, feed.getLikeCount(), false);
+    }
 }

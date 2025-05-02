@@ -24,7 +24,7 @@ import java.util.List;
 @RequestMapping("/api-user/chat-room")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
-@Tag(name = "채팅방 API", description = "채팅방 생성, 조회 등 기능 제공")
+@Tag(name = "Chat", description = "채팅방 생성, 조회 등 기능 제공")
 @Slf4j
 public class ChatRoomController {
 

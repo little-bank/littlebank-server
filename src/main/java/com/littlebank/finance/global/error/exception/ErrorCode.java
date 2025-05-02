@@ -33,7 +33,9 @@ public enum ErrorCode {
 
     // Feed
     FEED_NOT_FOUND(404, "F001","피드를 찾을 수 없습니다" ),
-    USER_NOT_EQUAL(403, "F002", "접근 권한이 없습니다");
+    USER_NOT_EQUAL(403, "F002", "접근 권한이 없습니다"),
+    ALREADY_LIKED(400, "F003", "이미 좋아요 눌렀습니다"),
+    LIKE_NOT_FOUND(404, "F004", "좋아요 정보가 존재하지 않습니다");
 
     private final String code;
     private final String message;

@@ -47,7 +47,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
             }
         }
 
-        log("과목"+subject);
         List<Feed> result = queryFactory.selectFrom(feed)
                 .where(builder)
                 .orderBy(feed.createdDate.desc())
