@@ -61,9 +61,10 @@ public class FeedController {
             @RequestParam(required = false) GradeCategory gradeCategory,
             @RequestParam(required = false) SubjectCategory subjectCategory,
             @RequestParam(required = false) TagCategory tagCategory,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
-        Page<FeedResponseDto> response = feedService.getFeeds(gradeCategory, subjectCategory, tagCategory, pageable);
+        Page<FeedResponseDto> response = feedService.getFeeds(customUserDetails.getId() ,gradeCategory, subjectCategory, tagCategory, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -79,8 +80,9 @@ public class FeedController {
 
     @Operation(summary = "피드 상세 조회")
     @GetMapping("/{feedId}")
-    public ResponseEntity<FeedResponseDto> getFeedDetail(@PathVariable Long feedId) {
-        FeedResponseDto response = feedService.getFeedDetail(feedId);
+    public ResponseEntity<FeedResponseDto> getFeedDetail(@PathVariable Long feedId,
+                                                         @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        FeedResponseDto response = feedService.getFeedDetail(customUserDetails.getId(), feedId);
         return ResponseEntity.ok(response);
     }
 

@@ -23,8 +23,9 @@ public class FeedResponseDto {
     private int viewCount;
     private int likeCount;
     private int commentCount;
+    private boolean liked;
 
-    public static FeedResponseDto of (Feed feed, List<FeedImage> images) {
+    public static FeedResponseDto of (Feed feed, List<FeedImage> images, boolean liked) {
         List<String> imageUrls = images.stream()
                 .map(FeedImage::getUrl)
                 .toList();
@@ -41,6 +42,7 @@ public class FeedResponseDto {
                 .viewCount(feed.getViewCount())
                 .likeCount(feed.getLikeCount())
                 .commentCount(feed.getCommentCount())
+                .liked(liked)
                 .build();
     }
 }
