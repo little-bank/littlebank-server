@@ -1,12 +1,12 @@
 package com.littlebank.finance.domain.feed.service;
 
 import com.littlebank.finance.domain.feed.domain.*;
-import com.littlebank.finance.domain.feed.domain.repository.FeedImageRepository;
-import com.littlebank.finance.domain.feed.domain.repository.FeedLikeRepository;
-import com.littlebank.finance.domain.feed.domain.repository.FeedRepository;
-import com.littlebank.finance.domain.feed.domain.repository.FeedRepositoryCustom;
+import com.littlebank.finance.domain.feed.domain.repository.*;
+import com.littlebank.finance.domain.feed.dto.request.FeedCommentRequestDto;
 import com.littlebank.finance.domain.feed.dto.request.FeedRequestDto;
 import com.littlebank.finance.domain.feed.dto.request.FeedImageRequestDto;
+import com.littlebank.finance.domain.feed.dto.response.FeedCommentResponseDto;
+import com.littlebank.finance.domain.feed.dto.response.FeedImageResponseDto;
 import com.littlebank.finance.domain.feed.dto.response.FeedResponseDto;
 import com.littlebank.finance.domain.feed.dto.response.FeedLikeResponseDto;
 import com.littlebank.finance.domain.feed.exception.FeedException;
@@ -16,7 +16,9 @@ import com.littlebank.finance.domain.user.exception.UserException;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class FeedService {
     private final FeedImageRepository feedImageRepository;
     private final FeedRepositoryCustom feedRepositoryCustom;
     private final FeedLikeRepository feedLikeRepository;
+    private final FeedCommentRepository feedCommentRepository;
 
     public FeedResponseDto createFeed(Long userId, FeedRequestDto request) {
         User user = userRepository.findById(userId)
@@ -178,5 +181,70 @@ public class FeedService {
         feedLikeRepository.delete(feedLike);
         feed.decreaseLikeCount();
         return FeedLikeResponseDto.of(feedId, feed.getLikeCount(), false);
+    }
+
+    public FeedCommentResponseDto createComment(Long userId, Long feedId, FeedCommentRequestDto request) {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new FeedException(ErrorCode.FEED_NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+        FeedComment comment = FeedComment.builder()
+                .feed(feed)
+                .user(user)
+                .content(request.getContent())
+                .build();
+        feedCommentRepository.save(comment);
+
+        return FeedCommentResponseDto.of(
+                comment.getId(),
+                feedId,
+                user.getName(),
+                user.getProfileImagePath(),
+                comment.getContent()
+        );
+    }
+
+    public FeedCommentResponseDto updateComment(Long userId, Long commentId, FeedCommentRequestDto request) {
+        FeedComment comment = feedCommentRepository.findById(commentId)
+                .orElseThrow(() -> new FeedException(ErrorCode.COMMENT_NOT_FOUND));
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new FeedException(ErrorCode.USER_NOT_EQUAL);
+        }
+        comment.update(request.getContent());
+
+        return FeedCommentResponseDto.of(
+                comment.getId(),
+                comment.getFeed().getId(),
+                comment.getUser().getName(),
+                comment.getUser().getProfileImagePath(),
+                comment.getContent()
+        );
+    }
+
+    public Page<FeedCommentResponseDto> getComments(Long feedId, int page, int size) {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new FeedException(ErrorCode.FEED_NOT_FOUND));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdDate"));
+        Page<FeedComment> commentPage = feedCommentRepository.findByFeedAndIsDeletedFalse(feed, pageable);
+
+        return commentPage.map(comment -> FeedCommentResponseDto.of(
+                comment.getId(),
+                comment.getFeed().getId(),
+                comment.getUser().getName(),
+                comment.getUser().getProfileImagePath(),
+                comment.getContent()
+        ));
+    }
+
+    @Transactional
+    public void deleteComment(Long userId, Long commentId) {
+        FeedComment comment = feedCommentRepository.findById(commentId)
+                .orElseThrow(() -> new FeedException(ErrorCode.COMMENT_NOT_FOUND));
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new FeedException(ErrorCode.USER_NOT_EQUAL);
+        }
+        feedCommentRepository.delete(comment);
     }
 }

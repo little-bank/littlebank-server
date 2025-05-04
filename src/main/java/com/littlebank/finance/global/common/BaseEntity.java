@@ -33,4 +33,5 @@ public class BaseEntity {
     protected BaseEntity(Boolean isDeleted) {
         this.isDeleted = isDeleted == null ? false : isDeleted;
     }
+
 }
