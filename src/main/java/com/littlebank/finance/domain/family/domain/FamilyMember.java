@@ -20,6 +20,8 @@ public class FamilyMember extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
+    @Column(length = 20, nullable = false)
+    private String nickname;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "family", nullable = false)
     private Family family;
@@ -33,10 +35,15 @@ public class FamilyMember extends BaseEntity {
     private Boolean isDeleted;
 
     @Builder
-    public FamilyMember(Family family, User user, Status status, Boolean isDeleted) {
+    public FamilyMember(String nickname, Family family, User user, Status status, Boolean isDeleted) {
+        this.nickname = nickname;
         this.family = family;
         this.user = user;
         this.status = status;
         this.isDeleted = isDeleted == null ? false : isDeleted;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

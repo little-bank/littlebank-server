@@ -6,10 +6,11 @@ import com.littlebank.finance.domain.family.domain.Status;
 import com.littlebank.finance.domain.family.domain.repository.FamilyMemberRepository;
 import com.littlebank.finance.domain.family.domain.repository.FamilyRepository;
 import com.littlebank.finance.domain.family.dto.request.FamilyMemberAddRequest;
+import com.littlebank.finance.domain.family.dto.request.MyFamilyNicknameUpdateRequest;
 import com.littlebank.finance.domain.family.dto.response.FamilyMemberAddResponse;
+import com.littlebank.finance.domain.family.dto.response.MyFamilyNicknameUpdateResponse;
 import com.littlebank.finance.domain.family.exception.FamilyMemberException;
 import com.littlebank.finance.domain.user.domain.User;
-import com.littlebank.finance.domain.user.domain.UserRole;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
 import com.littlebank.finance.global.error.exception.ErrorCode;
@@ -40,6 +41,7 @@ public class FamilyService {
                             .build());
 
                     return familyMemberRepository.save(FamilyMember.builder()
+                            .nickname(user.getName())
                             .family(newFamily)
                             .user(user)
                             .status(Status.JOINED)
@@ -59,11 +61,21 @@ public class FamilyService {
 
         // 맴버 요청 상태로 저장
         FamilyMember newMember = familyMemberRepository.save(FamilyMember.builder()
+                .nickname(targetUser.getName())
                 .family(member.getFamily())
                 .user(targetUser)
                 .status(Status.REQUESTED)
                 .build());
 
         return FamilyMemberAddResponse.of(newMember);
+    }
+
+    public MyFamilyNicknameUpdateResponse updateMyFamilyNickname(MyFamilyNicknameUpdateRequest request) {
+        FamilyMember familyMember = familyMemberRepository.findById(request.getFamilyMemberId())
+                .orElseThrow(() -> new FamilyMemberException(ErrorCode.FAMILY_MEMBER_NOT_FOUND));
+
+        familyMember.updateNickname(request.getNickname());
+
+        return MyFamilyNicknameUpdateResponse.of(familyMember);
     }
 }

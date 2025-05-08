@@ -21,8 +21,9 @@ public enum ErrorCode {
     NO_PERMISSION_TO_MODIFY(403, "F003", "수정 권한이 없습니다"),
 
     // FamilyMember
-    FAMILY_INVITE_ALREADY_SENT(409, "FM001", "가족 맴버로 초대를 보낸 상태입니다"),
-    FAMILY_MEMBER_ALREADY_EXISTS(409, "FM002", "가족 맴버로 소속되어 있습니다"),
+    FAMILY_MEMBER_NOT_FOUND(404, "FM001", "가족 맴버가 존재하지 않습니다"),
+    FAMILY_INVITE_ALREADY_SENT(409, "FM002", "가족 맴버로 초대를 보낸 상태입니다"),
+    FAMILY_MEMBER_ALREADY_EXISTS(409, "FM003", "가족 맴버로 소속되어 있습니다"),
 
     // Auth
     PASSWORD_NOT_MATCHED(401, "A001", "비밀번호가 일치하지 않습니다"),
