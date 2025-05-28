@@ -22,4 +22,5 @@ public interface FamilyMemberRepository extends JpaRepository<FamilyMember, Long
     int deleteByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 
     Optional<FamilyMember> findByUserId(Long userId);
+
 }

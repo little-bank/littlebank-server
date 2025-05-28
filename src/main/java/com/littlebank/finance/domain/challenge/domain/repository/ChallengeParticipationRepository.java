@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ChallengeParticipationRepository extends JpaRepository<ChallengeParticipation, Long> {
+public interface ChallengeParticipationRepository extends JpaRepository<ChallengeParticipation, Long>, CustomChallengeParticipationRepository {
     boolean existsByChallengeIdAndUserId(Long challengeId, Long userId);
 
     @Query("SELECT COUNT(cp) FROM ChallengeParticipation cp " +
@@ -21,29 +21,16 @@ public interface ChallengeParticipationRepository extends JpaRepository<Challeng
     int countByChallengeIdAndStatuses(@Param("challengeId") Long challengeId,
                                       @Param("statuses") List<ChallengeStatus> challengeStatuses);
 
-    @Query("SELECT cp FROM ChallengeParticipation cp " +
-            "JOIN FETCH cp.challenge c " +
-            "JOIN FETCH cp.user u " +
-            "WHERE cp.user.id = :userId " +
-            "AND cp.challengeStatus IN :statuses " +
-            "AND cp.isDeleted = false " +
-            "AND c.isDeleted = false" +
-            "")
-    Page<ChallengeParticipation> findMyValidParticipations(
-            @Param("userId") Long userId,
-            @Param("statuses") List<ChallengeStatus> statuses,
-            Pageable pageable);
-
     @Query("""
-    SELECT cp
-    FROM ChallengeParticipation cp
-    JOIN cp.user u
-    JOIN FamilyMember fm ON fm.user = u
-    WHERE fm.family.id = :familyId
-    AND fm.status = 'JOINED'
-      AND u.role = 'CHILD'
-      AND cp.challengeStatus IN :statuses
-""")
+        SELECT cp
+        FROM ChallengeParticipation cp
+        JOIN cp.user u
+        JOIN FamilyMember fm ON fm.user = u
+        WHERE fm.family.id = :familyId
+        AND fm.status = 'JOINED'
+          AND u.role = 'CHILD'
+          AND cp.challengeStatus IN :statuses
+    """)
     List<ChallengeParticipation> findChildrenParticipationByFamilyId(
             @Param("familyId") Long familyId,
             @Param("statuses") List<ChallengeStatus> statuses

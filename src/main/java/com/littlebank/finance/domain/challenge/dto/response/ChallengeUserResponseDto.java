@@ -12,7 +12,8 @@ import java.time.LocalTime;
 @Builder
 @AllArgsConstructor
 public class ChallengeUserResponseDto {
-    private Long id;
+    private Long participationId;
+    private Long challengeId;
     private LocalDate startDate;
     private LocalDate endDate;
     private String title;
@@ -21,10 +22,12 @@ public class ChallengeUserResponseDto {
     private LocalTime startTime;
     private Integer totalStudyTime;
     private Integer reward;
+    private boolean isAccepted;
 
     public static ChallengeUserResponseDto of(ChallengeParticipation participation) {
         return ChallengeUserResponseDto.builder()
-                .id(participation.getId())
+                .participationId(participation.getId())
+                .challengeId(participation.getChallenge().getId())
                 .startDate(participation.getStartDate())
                 .endDate(participation.getEndDate())
                 .title(participation.getTitle())
@@ -33,6 +36,7 @@ public class ChallengeUserResponseDto {
                 .startTime(participation.getStartTime())
                 .totalStudyTime(participation.getTotalStudyTime())
                 .reward(participation.getReward())
+                .isAccepted(participation.getIsAccepted())
                 .build();
     }
 }

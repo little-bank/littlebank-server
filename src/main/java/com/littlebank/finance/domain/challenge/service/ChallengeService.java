@@ -11,28 +11,38 @@ import com.littlebank.finance.domain.challenge.dto.request.ChallengeUserRequestD
 import com.littlebank.finance.domain.challenge.dto.response.admin.ChallengeAdminResponseDto;
 import com.littlebank.finance.domain.challenge.dto.response.ChallengeUserResponseDto;
 import com.littlebank.finance.domain.challenge.exception.ChallengeException;
+import com.littlebank.finance.domain.family.domain.Family;
 import com.littlebank.finance.domain.family.domain.FamilyMember;
 import com.littlebank.finance.domain.family.domain.repository.FamilyMemberRepository;
+import com.littlebank.finance.domain.family.domain.repository.FamilyRepository;
 import com.littlebank.finance.domain.family.exception.FamilyException;
+import com.littlebank.finance.domain.notification.domain.Notification;
+import com.littlebank.finance.domain.notification.domain.NotificationType;
+import com.littlebank.finance.domain.notification.domain.repository.NotificationRepository;
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
 import com.littlebank.finance.global.common.CustomPageResponse;
 import com.littlebank.finance.global.common.PaginationPolicy;
 import com.littlebank.finance.global.error.exception.ErrorCode;
+import com.littlebank.finance.global.firebase.FirebaseService;
 import com.littlebank.finance.global.redis.RedisPolicy;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -44,6 +54,9 @@ public class ChallengeService {
     private final ChallengeParticipationRepository challengeParticipationRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final ChallengeRepositoryCustom challengeRepositoryCustom;
+    private final FamilyRepository familyRepository;
+    private final NotificationRepository notificationRepository;
+    private final FirebaseService firebaseService;
 
 
     public ChallengeUserResponseDto joinChallenge(Long userId, Long challengeId, ChallengeUserRequestDto request) {
@@ -88,12 +101,10 @@ public class ChallengeService {
             LocalDateTime userStartDateTime = LocalDateTime.of(request.getStartDate(), request.getStartTime());
 
             ChallengeStatus challengeStatus;
-            if (now.isBefore(userStartDateTime)) {
-                challengeStatus = ChallengeStatus.BEFORE;
-            } else if (now.isAfter(request.getEndDate().atTime(23, 59, 59))) {
+            if (now.isAfter(request.getEndDate().atTime(23, 59, 59))) {
                 challengeStatus = ChallengeStatus.FINISHED;
             } else {
-                challengeStatus = ChallengeStatus.IN_PROGRESS;
+                challengeStatus = ChallengeStatus.REQUESTED;
             }
 
             ChallengeParticipation participation;
@@ -109,6 +120,7 @@ public class ChallengeService {
                         .startTime(request.getStartTime())
                         .totalStudyTime(request.getTotalStudyTime())
                         .reward(request.getReward())
+                        .isAccepted(false)
                         .isDeleted(false)
                         .build();
             } else {
@@ -123,6 +135,7 @@ public class ChallengeService {
                         .startTime(request.getStartTime())
                         .totalStudyTime(request.getTotalStudyTime())
                         .reward(request.getReward())
+                        .isAccepted(false)
                         .isDeleted(false)
                         .build();
             }
@@ -130,6 +143,27 @@ public class ChallengeService {
             participationRepository.save(participation);
             challenge.setCurrentParticipants(challenge.getCurrentParticipants() + 1);
             challengeRepository.save(challenge);
+
+            // 알림
+            Family family = familyRepository.findByUserIdWithMember(userId)
+                    .orElseThrow(() -> new FamilyException(ErrorCode.FAMILY_NOT_FOUND));
+            List<FamilyMember> parents = familyMemberRepository.findParentsByFamilyId(family.getId());
+            try {
+                for (FamilyMember parent : parents) {
+                    Notification notification = notificationRepository.save(
+                            Notification.builder()
+                                    .receiver(parent.getUser())
+                                    .message("우리 예쁜 "+ family.getMembers().get(0).getNickname() + "(이)가 목표를 신청했어요!")
+                                    .type(NotificationType.CHALLENGE_JOIN)
+                                    .targetId(challenge.getId())
+                                    .isRead(false)
+                                    .build());
+                    firebaseService.sendNotification(notification);
+                }
+            } catch (DataIntegrityViolationException e) {
+                log.warn("이미 동일한 알림이 존재합니다.");
+            }
+            
             return ChallengeUserResponseDto.of(participation);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -161,7 +195,7 @@ public class ChallengeService {
         List<ChallengeAdminResponseDto> responseList = challenges.stream()
                 .map(challenge -> {
                     int currentActiveParticipants = participationRepository.countByChallengeIdAndStatuses(
-                            challenge.getId(), List.of(ChallengeStatus.BEFORE, ChallengeStatus.IN_PROGRESS)
+                            challenge.getId(), List.of(ChallengeStatus.REQUESTED, ChallengeStatus.ACCEPT)
                     );
                     return ChallengeAdminResponseDto.of(challenge, currentActiveParticipants);
                 })
@@ -178,12 +212,12 @@ public class ChallengeService {
 
         challenge.increaseViewCount();
         int currentActiveParticipants = participationRepository.countByChallengeIdAndStatuses(
-                challengeId, List.of(ChallengeStatus.BEFORE, ChallengeStatus.IN_PROGRESS)
+                challengeId, List.of(ChallengeStatus.REQUESTED, ChallengeStatus.ACCEPT)
         );
         return ChallengeAdminResponseDto.of(challenge, currentActiveParticipants);
     }
 
-    public CustomPageResponse<ChallengeUserResponseDto> getMyChallenges(Long userId, ChallengeStatus challengeStatus, int page) {
+    public CustomPageResponse<ChallengeUserResponseDto> getMyChallenges(Long userId, String type, int page) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
@@ -192,17 +226,15 @@ public class ChallengeService {
                 Sort.by(Sort.Direction.DESC, "createdDate")
         );
 
-        List<ChallengeStatus> filterStatuses;
-        if (challengeStatus == ChallengeStatus.BEFORE || challengeStatus == ChallengeStatus.IN_PROGRESS) {
-            filterStatuses = List.of(ChallengeStatus.BEFORE, ChallengeStatus.IN_PROGRESS);
-        } else if (challengeStatus == ChallengeStatus.FINISHED) {
-            filterStatuses = List.of(ChallengeStatus.FINISHED);
-        } else {
-            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_CATEGORY);
-        }
 
-        Page<ChallengeParticipation> participations = participationRepository
-                .findMyValidParticipations(user.getId(), filterStatuses, pageable);
+        Page<ChallengeParticipation> participations;
+        if ("ONGOING".equalsIgnoreCase(type)) {
+            participations = participationRepository.findOngoingParticipations(userId, pageable);
+        } else if ("COMPLETED".equalsIgnoreCase(type)) {
+            participations = participationRepository.findCompletedParticipations(userId, pageable);
+        } else {
+            throw new ChallengeException(ErrorCode.UNVALID_MY_PARTICIPATION_TYPE);
+        }
 
         List<ChallengeUserResponseDto> challengeList = participations.stream()
                 .map(ChallengeUserResponseDto::of)
@@ -213,7 +245,7 @@ public class ChallengeService {
 
     }
 
-    public List<ChallengeUserResponseDto> getChildChallenge(Long familyId, Long userId) {
+    public List<ChallengeUserResponseDto> getChildInProgressChallenge(Long familyId, Long userId) {
         FamilyMember familyMember = familyMemberRepository.findByUserId(userId)
                 .orElseThrow(() -> new FamilyException(ErrorCode.FAMILY_MEMBER_NOT_FOUND));
 
@@ -222,7 +254,24 @@ public class ChallengeService {
             throw new FamilyException(ErrorCode.FAMILY_NOT_FOUND);
         }
         List<ChallengeParticipation> participations = challengeParticipationRepository.findChildrenParticipationByFamilyId
-                (familyId, List.of(ChallengeStatus.BEFORE, ChallengeStatus.IN_PROGRESS));
+                (familyId, List.of(ChallengeStatus.REQUESTED, ChallengeStatus.ACCEPT));
         return participations.stream().map(ChallengeUserResponseDto::of).toList();
+    }
+
+    public ChallengeUserResponseDto acceptApplyChallenge(Long participationId, Long parentId) {
+        User parent = userRepository.findById(parentId)
+                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+        ChallengeParticipation participation = participationRepository.findById(participationId)
+                .orElseThrow(() -> new ChallengeException(ErrorCode.NOT_FOUND_PARTICIPATION));
+
+        if(participation.getEndDate().isBefore(LocalDate.now())) {
+            throw new ChallengeException(ErrorCode.CHALLENGE_END_DATE_EXPIRED);
+        }
+        if (!participation.getIsAccepted()) participation.setIsAccepted(true);
+        else throw new ChallengeException(ErrorCode.ALREADY_ACCEPT);
+
+        participation.setChallengeStatus(ChallengeStatus.ACCEPT);
+        return ChallengeUserResponseDto.of(participation);
     }
 }

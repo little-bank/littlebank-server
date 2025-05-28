@@ -71,7 +71,10 @@ public enum ErrorCode {
     LOCK_INTERUPPTED(500, "CH004", "챌린지 참여 처리 중 오류 발생했습니다"),
     CHALLENGE_FULL(400, "CH005", "챌린지 참여 인원을 초과했습니다"),
     INVALID_CHALLENGE_CATEGORY(400, "CH006", "카테고리가 타당하지 않습니다"),
-  
+    CHALLENGE_END_DATE_EXPIRED(400, "CH007", "챌린지 기한이 지났습니다"),
+    NOT_FOUND_PARTICIPATION(400, "CH008", "자식이 챌린지에 참여하지 않았습니다"),
+    ALREADY_ACCEPT(400, "CH009", "이미 아이의 챌리지 신청을 승낙했습니다"),
+    UNVALID_MY_PARTICIPATION_TYPE( 400, "CH010", "타입은 진행중, 완료한 두 개만 존재합니다"),
     // GAME
     GAME_NOT_FOUND( 404, "G001", "게임을 찾을 수 없습니다"),
     ALREADY_VOTED(400, "G002", "이미 투표했습니다");

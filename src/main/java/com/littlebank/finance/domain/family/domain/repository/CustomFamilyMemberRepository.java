@@ -13,6 +13,6 @@ public interface CustomFamilyMemberRepository {
     List<FamilyMember> findByMemberIdWithFamilyAndUser(Long memberId);
     List<FamilyMember> findAllByFamilyIdAndStatusWithUser(Long familyId, Status status);
     List<FamilyMember> findParentsByFamilyId(Long familyId);
-
+    List<FamilyMember> findChildsByFamilyId(Long id);
     FamilyInfoResponse getFamilyInfoByUserId(Long userId);
 }

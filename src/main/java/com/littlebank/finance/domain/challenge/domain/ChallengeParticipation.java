@@ -42,6 +42,8 @@ public class ChallengeParticipation extends BaseEntity {
     private Integer totalStudyTime;
     @Column(nullable = false)
     private Integer reward;
+    @Column(name = "is_accepted", nullable = false)
+    private Boolean isAccepted = false;
     @Column(nullable = false)
     private Boolean isDeleted = false;
 

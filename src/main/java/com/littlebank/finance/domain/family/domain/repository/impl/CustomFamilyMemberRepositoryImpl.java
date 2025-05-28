@@ -95,6 +95,19 @@ public class CustomFamilyMemberRepositoryImpl implements CustomFamilyMemberRepos
     }
 
     @Override
+    public List<FamilyMember> findChildsByFamilyId(Long familyId) {
+        return queryFactory
+                .selectFrom(m)
+                .join(u).on(u.id.eq(m.user.id)).fetchJoin()
+                .join(f).on(f.id.eq(m.family.id)).fetchJoin()
+                .where(f.id.eq(familyId)
+                        .and(m.status.eq(Status.JOINED))
+                        .and(u.role.eq(UserRole.CHILD))
+                )
+                .fetch();
+    }
+
+    @Override
     public FamilyInfoResponse getFamilyInfoByUserId(Long userId) {
         Long familyId = queryFactory
                 .select(m.family.id)
