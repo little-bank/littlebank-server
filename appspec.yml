@@ -15,6 +15,6 @@ permissions:
 
 hooks:
   AfterInstall:
-    - location: scripts/after-deploy.sh
+    - location: scripts/after-deploy-dev.sh
       timeout: 2000
       runas: ubuntu
