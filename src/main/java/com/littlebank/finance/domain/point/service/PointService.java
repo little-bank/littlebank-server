@@ -216,8 +216,8 @@ public class PointService {
     }
 
     @Transactional(readOnly = true)
-    public List<LatestRefundDepositTargetResponse> getRefundLatestDepositTarget(Long userId) {
-        return refundRepository.findRefundDepositTargetByUserId(userId);
+    public CustomPageResponse<LatestRefundDepositTargetResponse> getRefundLatestDepositTarget(Long userId) {
+        return CustomPageResponse.of(refundRepository.findRefundDepositTargetByUserId(userId));
     }
 
     @Transactional(readOnly = true)

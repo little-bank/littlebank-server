@@ -121,10 +121,10 @@ public class PointController {
 
     @Operation(summary = "최근 포인트를 꺼낸 대상 조회 API")
     @GetMapping("/refund/latest/deposit-target")
-    public ResponseEntity<List<LatestRefundDepositTargetResponse>> getRefundLatestDepositTarget(
+    public ResponseEntity<CustomPageResponse<LatestRefundDepositTargetResponse>> getRefundLatestDepositTarget(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        List<LatestRefundDepositTargetResponse> response = pointService.getRefundLatestDepositTarget(customUserDetails.getId());
+        CustomPageResponse<LatestRefundDepositTargetResponse> response = pointService.getRefundLatestDepositTarget(customUserDetails.getId());
         return ResponseEntity.ok(response);
     }
 
