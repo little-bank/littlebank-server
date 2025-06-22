@@ -76,7 +76,7 @@ public class CustomRefundRepositoryImpl implements CustomRefundRepository {
     }
 
     @Override
-    public List<LatestRefundDepositTargetResponse> findRefundDepositTargetByUserId(Long userId) {
+    public Page<LatestRefundDepositTargetResponse> findRefundDepositTargetByUserId(Long userId, Pageable pageable) {
         List<LatestRefundDepositTargetResponse> results = queryFactory
                 .select(Projections.constructor(
                         LatestRefundDepositTargetResponse.class,
@@ -94,6 +94,6 @@ public class CustomRefundRepositoryImpl implements CustomRefundRepository {
                 .limit(LATEST_REFUND_DEPOSIT_TARGET_ROW)
                 .fetch();
 
-        return results;
+        return new PageImpl<>(results, pageable, results.size());
     }
 }

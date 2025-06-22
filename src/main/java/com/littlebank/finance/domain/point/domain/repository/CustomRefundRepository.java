@@ -11,5 +11,5 @@ import java.util.List;
 public interface CustomRefundRepository {
     Page<RefundHistoryResponse> findRefundHistoryByUserId(Long userId, Pageable pageable);
     List<SendPointHistoryResponse> findRefundHistoryByUserId(Long userId);
-    List<LatestRefundDepositTargetResponse> findRefundDepositTargetByUserId(Long userId);
+    Page<LatestRefundDepositTargetResponse> findRefundDepositTargetByUserId(Long userId, Pageable pageable);
 }
