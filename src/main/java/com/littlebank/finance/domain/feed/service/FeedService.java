@@ -13,6 +13,7 @@ import com.littlebank.finance.domain.notification.domain.repository.Notification
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
+import com.littlebank.finance.global.common.CustomPageResponse;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import com.littlebank.finance.global.firebase.FirebaseService;
 import com.littlebank.finance.global.redis.RedisDao;
@@ -150,19 +151,20 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getFeedsOrderByTime(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
+    public CustomPageResponse<FeedResponseDto> getFeedsOrderByTime(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-        return feedRepositoryCustom.findAllByFiltersOrderByTime(gradeCategory, subjectCategory, tagCategory, pageable)
+        Page<FeedResponseDto> feedPage = feedRepositoryCustom.findAllByFiltersOrderByTime(gradeCategory, subjectCategory, tagCategory, pageable)
                 .map(feed -> {
                     List<FeedImage> images = feedImageRepository.findByFeed(feed);
-
                     String likeSetKey = RedisPolicy.FEED_LIKE_SET_KEY_PREFIX + feed.getId();
                     boolean liked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
                     int likeCount = redisDao.getSetSize(likeSetKey);
                     return FeedResponseDto.of(feed, images, likeCount, liked);
                 });
+
+        return CustomPageResponse.of(feedPage);
     }
 
     @Transactional(readOnly = true)

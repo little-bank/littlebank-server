@@ -7,11 +7,14 @@ import com.littlebank.finance.domain.feed.dto.request.FeedCommentRequestDto;
 import com.littlebank.finance.domain.feed.dto.request.FeedRequestDto;
 import com.littlebank.finance.domain.feed.dto.response.*;
 import com.littlebank.finance.domain.feed.service.FeedService;
+import com.littlebank.finance.global.common.CustomPageResponse;
+import com.littlebank.finance.global.common.PaginationPolicy;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,14 +57,15 @@ public class FeedController {
 
     @Operation(summary = "피드 전체 목록 조회")
     @GetMapping
-    public ResponseEntity<Page<FeedResponseDto>> getFeeds (
+    public ResponseEntity<CustomPageResponse<FeedResponseDto>> getFeeds (
             @RequestParam(required = false) GradeCategory gradeCategory,
             @RequestParam(required = false) SubjectCategory subjectCategory,
             @RequestParam(required = false) TagCategory tagCategory,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable,
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
-        Page<FeedResponseDto> response = feedService.getFeedsOrderByTime(customUserDetails.getId() ,gradeCategory, subjectCategory, tagCategory, pageable);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedResponseDto> response = feedService.getFeedsOrderByTime(customUserDetails.getId() ,gradeCategory, subjectCategory, tagCategory, pageable);
         return ResponseEntity.ok(response);
     }
 
