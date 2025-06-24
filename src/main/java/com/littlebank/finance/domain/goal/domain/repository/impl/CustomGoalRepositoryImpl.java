@@ -17,6 +17,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -83,8 +86,8 @@ public class CustomGoalRepositoryImpl implements CustomGoalRepository {
         return results;
     }
 
-    public List<ChildGoalResponse> findChildWeeklyGoalResponses(Long familyId) {
-        return queryFactory
+    public Page<ChildGoalResponse> findChildWeeklyGoalResponses(Long familyId, Pageable pageable) {
+        List<ChildGoalResponse> results = queryFactory
                 .select(Projections.constructor(
                         ChildGoalResponse.class,
                         g.id,
@@ -109,6 +112,7 @@ public class CustomGoalRepositoryImpl implements CustomGoalRepository {
                                 .and(g.createdBy.id.eq(fm.user.id))
                 )
                 .fetch();
+        return new PageImpl<>(results, pageable, results.size());
     }
 
     public List<ChildGoalResponse> findAllChildGoalResponses(Long familyId) {

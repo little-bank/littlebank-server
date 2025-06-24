@@ -19,11 +19,13 @@ import com.littlebank.finance.domain.notification.domain.repository.Notification
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
+import com.littlebank.finance.global.common.CustomPageResponse;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import com.littlebank.finance.global.firebase.FirebaseService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,8 +122,8 @@ public class GoalService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChildGoalResponse> getChildWeeklyGoal(Long familyId) {
-        return goalRepository.findChildWeeklyGoalResponses(familyId);
+    public CustomPageResponse<ChildGoalResponse> getChildWeeklyGoal(Long familyId, Pageable pageable) {
+        return CustomPageResponse.of(goalRepository.findChildWeeklyGoalResponses(familyId, pageable));
     }
 
     public CommonGoalResponse acceptApplyGoal(Long targetGoalId) {

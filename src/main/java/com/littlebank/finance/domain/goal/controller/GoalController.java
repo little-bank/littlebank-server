@@ -4,12 +4,16 @@ import com.littlebank.finance.domain.goal.dto.request.GoalApplyRequest;
 import com.littlebank.finance.domain.goal.dto.request.GoalUpdateRequest;
 import com.littlebank.finance.domain.goal.dto.response.*;
 import com.littlebank.finance.domain.goal.service.GoalService;
+import com.littlebank.finance.global.common.CustomPageResponse;
+import com.littlebank.finance.global.common.PaginationPolicy;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -74,11 +78,13 @@ public class GoalController {
 
     @Operation(summary = "(부모)이번 주 아이들의 목표 조회 API")
     @GetMapping("/parent/weekly/{familyId}")
-    public ResponseEntity<List<ChildGoalResponse>> getChildWeeklyGoal(
+    public ResponseEntity<CustomPageResponse<ChildGoalResponse>> getChildWeeklyGoal(
             @Parameter(description = "목표를 조회할 가족 식별 id")
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @PathVariable("familyId") Long familyId
     ) {
-        List<ChildGoalResponse> response = goalService.getChildWeeklyGoal(familyId);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<ChildGoalResponse> response = goalService.getChildWeeklyGoal(familyId, pageable);
         return ResponseEntity.ok(response);
     }
 
