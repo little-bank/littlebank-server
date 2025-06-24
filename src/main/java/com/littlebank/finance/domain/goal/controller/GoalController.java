@@ -49,10 +49,12 @@ public class GoalController {
 
     @Operation(summary = "(아이)내 모든 목표 조회 API")
     @GetMapping("/child/all")
-    public ResponseEntity<List<MyGoalResponse>> getMyGoals(
+    public ResponseEntity<CustomPageResponse<MyGoalResponse>> getMyGoals(
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        List<MyGoalResponse> responses = goalService.getMyGoals(customUserDetails.getId());
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<MyGoalResponse> responses = goalService.getMyGoals(customUserDetails.getId(), pageable);
         return ResponseEntity.ok(responses);
     }
 

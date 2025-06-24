@@ -111,6 +111,9 @@ public class CustomGoalRepositoryImpl implements CustomGoalRepository {
                                 )
                                 .and(g.createdBy.id.eq(fm.user.id))
                 )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(g.startDate.desc())
                 .fetch();
         return new PageImpl<>(results, pageable, results.size());
     }
