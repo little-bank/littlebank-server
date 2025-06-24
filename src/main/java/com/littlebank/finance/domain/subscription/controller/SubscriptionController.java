@@ -5,9 +5,13 @@ import com.littlebank.finance.domain.subscription.dto.request.SubscriptionPurcha
 import com.littlebank.finance.domain.subscription.dto.response.SubscriptionResponseDto;
 import com.littlebank.finance.domain.subscription.service.PurchaseService;
 import com.littlebank.finance.domain.subscription.service.SubscriptionService;
+import com.littlebank.finance.global.common.CustomPageResponse;
+import com.littlebank.finance.global.common.PaginationPolicy;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +39,12 @@ public class SubscriptionController {
 
     @Operation(summary = "나의 구독 정보 조회")
     @GetMapping("/my")
-    public ResponseEntity<List<SubscriptionResponseDto>> getMySubscription(
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
-        List<SubscriptionResponseDto> response = subscriptionService.getMySubscription(user.getId());
+    public ResponseEntity<CustomPageResponse<SubscriptionResponseDto>> getMySubscription(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam(name = "pageNumber") Integer pageNumber
+            ) {
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<SubscriptionResponseDto> response = subscriptionService.getMySubscription(user.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
