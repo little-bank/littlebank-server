@@ -71,14 +71,15 @@ public class FeedController {
 
     @Operation(summary = "피드 좋아요 순 전체 목록 조회")
     @GetMapping("/likes")
-    public ResponseEntity<Page<FeedResponseDto>> getFeedsOrderByLikes (
+    public ResponseEntity<CustomPageResponse<FeedResponseDto>> getFeedsOrderByLikes (
             @RequestParam(required = false) GradeCategory gradeCategory,
             @RequestParam(required = false) SubjectCategory subjectCategory,
             @RequestParam(required = false) TagCategory tagCategory,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable,
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        Page<FeedResponseDto> feeds = feedService.getFeedsOrderByLikes(customUserDetails.getId(), gradeCategory, subjectCategory, tagCategory, pageable);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedResponseDto> feeds = feedService.getFeedsOrderByLikes(customUserDetails.getId(), gradeCategory, subjectCategory, tagCategory, pageable);
         return ResponseEntity.ok(feeds);
     }
 

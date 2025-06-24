@@ -168,11 +168,11 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getFeedsOrderByLikes(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
+    public CustomPageResponse<FeedResponseDto> getFeedsOrderByLikes(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-        return feedRepositoryCustom.findAllByFiltersOrderByLikes(gradeCategory, subjectCategory, tagCategory, pageable)
+        Page<FeedResponseDto> feedPage =  feedRepositoryCustom.findAllByFiltersOrderByLikes(gradeCategory, subjectCategory, tagCategory, pageable)
                 .map(feed -> {
                     List<FeedImage> images = feedImageRepository.findByFeed(feed);
 
@@ -181,6 +181,7 @@ public class FeedService {
                     int likeCount = redisDao.getSetSize(likeSetKey);
                     return FeedResponseDto.of(feed, images, likeCount, liked);
                 });
+        return CustomPageResponse.of(feedPage);
     }
 
     @Transactional(readOnly = true)
