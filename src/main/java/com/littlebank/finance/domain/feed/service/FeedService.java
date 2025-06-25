@@ -156,13 +156,7 @@ public class FeedService {
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
         Page<FeedResponseDto> feedPage = feedRepositoryCustom.findAllByFiltersOrderByTime(gradeCategory, subjectCategory, tagCategory, pageable)
-                .map(feed -> {
-                    List<FeedImage> images = feedImageRepository.findByFeed(feed);
-                    String likeSetKey = RedisPolicy.FEED_LIKE_SET_KEY_PREFIX + feed.getId();
-                    boolean liked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
-                    int likeCount = redisDao.getSetSize(likeSetKey);
-                    return FeedResponseDto.of(feed, images, likeCount, liked);
-                });
+                .map(feed -> toFeedResponseDto(feed, userId));
 
         return CustomPageResponse.of(feedPage);
     }
@@ -173,14 +167,7 @@ public class FeedService {
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
         Page<FeedResponseDto> feedPage =  feedRepositoryCustom.findAllByFiltersOrderByLikes(gradeCategory, subjectCategory, tagCategory, pageable)
-                .map(feed -> {
-                    List<FeedImage> images = feedImageRepository.findByFeed(feed);
-
-                    String likeSetKey = RedisPolicy.FEED_LIKE_SET_KEY_PREFIX + feed.getId();
-                    boolean liked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
-                    int likeCount = redisDao.getSetSize(likeSetKey);
-                    return FeedResponseDto.of(feed, images, likeCount, liked);
-                });
+                .map(feed ->toFeedResponseDto(feed, userId));
         return CustomPageResponse.of(feedPage);
     }
 
@@ -188,7 +175,6 @@ public class FeedService {
     public CustomPageResponse<FeedResponseDto> getFeedsByUser(Long userId, Pageable pageable) {
         Page<FeedResponseDto> feedPage = feedRepository.findByUserId(userId, pageable)
                 .map(feed -> toFeedResponseDto(feed, userId));
-
         return CustomPageResponse.of(feedPage);
     }
     private FeedResponseDto toFeedResponseDto(Feed feed, Long userId) {
