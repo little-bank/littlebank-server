@@ -1,7 +1,8 @@
-package com.littlebank.finance.domain.subscription.domain.repository;
+package com.littlebank.finance.domain.subscription.domain.repository.impl;
 
 import com.littlebank.finance.domain.subscription.domain.QSubscription;
 import com.littlebank.finance.domain.subscription.domain.Subscription;
+import com.littlebank.finance.domain.subscription.domain.repository.CustomSubscriptionRepository;
 import com.littlebank.finance.domain.user.domain.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

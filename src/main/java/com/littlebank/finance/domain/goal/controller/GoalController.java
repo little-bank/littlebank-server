@@ -81,8 +81,8 @@ public class GoalController {
     @Operation(summary = "(부모)이번 주 아이들의 목표 조회 API")
     @GetMapping("/parent/weekly/{familyId}")
     public ResponseEntity<CustomPageResponse<ChildGoalResponse>> getChildWeeklyGoal(
-            @Parameter(description = "목표를 조회할 가족 식별 id")
             @RequestParam(name = "pageNumber") Integer pageNumber,
+            @Parameter(description = "목표를 조회할 가족 식별 id")
             @PathVariable("familyId") Long familyId
     ) {
         Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);

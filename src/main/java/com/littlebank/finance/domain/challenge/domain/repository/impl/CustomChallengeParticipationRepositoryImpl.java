@@ -1,9 +1,10 @@
-package com.littlebank.finance.domain.challenge.domain.repository;
+package com.littlebank.finance.domain.challenge.domain.repository.impl;
 
 import com.littlebank.finance.domain.challenge.domain.ChallengeParticipation;
 import com.littlebank.finance.domain.challenge.domain.ChallengeStatus;
 import com.littlebank.finance.domain.challenge.domain.QChallenge;
 import com.littlebank.finance.domain.challenge.domain.QChallengeParticipation;
+import com.littlebank.finance.domain.challenge.domain.repository.CustomChallengeParticipationRepository;
 import com.littlebank.finance.domain.family.domain.QFamilyMember;
 import com.littlebank.finance.domain.notification.dto.response.ChallengeAchievementNotificationDto;
 import com.littlebank.finance.domain.user.domain.QUser;

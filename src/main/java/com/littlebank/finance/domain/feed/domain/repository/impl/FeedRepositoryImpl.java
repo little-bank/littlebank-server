@@ -1,6 +1,7 @@
-package com.littlebank.finance.domain.feed.domain.repository;
+package com.littlebank.finance.domain.feed.domain.repository.impl;
 
 import com.littlebank.finance.domain.feed.domain.*;
+import com.littlebank.finance.domain.feed.domain.repository.FeedRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static java.rmi.server.LogStream.log;
 @Slf4j
 @Repository
 public class FeedRepositoryImpl implements FeedRepositoryCustom {

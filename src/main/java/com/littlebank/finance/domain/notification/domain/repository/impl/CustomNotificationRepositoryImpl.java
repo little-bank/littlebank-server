@@ -1,6 +1,7 @@
-package com.littlebank.finance.domain.notification.domain.repository;
+package com.littlebank.finance.domain.notification.domain.repository.impl;
 
 import com.littlebank.finance.domain.notification.domain.QNotification;
+import com.littlebank.finance.domain.notification.domain.repository.CustomNotificationRepository;
 import com.littlebank.finance.domain.notification.dto.response.NotificationResponseDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
