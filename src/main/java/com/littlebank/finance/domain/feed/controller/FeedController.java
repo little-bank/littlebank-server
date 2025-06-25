@@ -86,11 +86,12 @@ public class FeedController {
 
     @Operation(summary = "내가 쓴 피드 조회")
     @GetMapping("/my")
-    public ResponseEntity<Page<FeedResponseDto>> getMyFeeds (
+    public ResponseEntity<CustomPageResponse<FeedResponseDto>> getMyFeeds (
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(name = "pageNumber") Integer pageNumber
     ) {
-        Page<FeedResponseDto> response = feedService.getFeedsByUser(customUserDetails.getId(), pageable);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedResponseDto> response = feedService.getFeedsByUser(customUserDetails.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
