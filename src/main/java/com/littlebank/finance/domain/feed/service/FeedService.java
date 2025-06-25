@@ -547,13 +547,11 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedCommentResponseDto> getTopLevelComments(Long feedId, int page, int size, Long userId) {
+    public CustomPageResponse<FeedCommentResponseDto> getTopLevelComments(Long feedId, Long userId, Pageable pageable) {
         Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(() -> new FeedException(ErrorCode.FEED_NOT_FOUND));
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdDate"));
-        Page<FeedComment> commentPage = feedCommentRepository.findByFeedAndParentIsNullAndIsDeletedFalse(feed, pageable);
-
-        return commentPage.map(comment -> {
+        Page<FeedComment> result = feedCommentRepository.findByFeedAndParentIsNullAndIsDeletedFalse(feed, pageable);
+        Page<FeedCommentResponseDto> results = result.map(comment -> {
             String likeSetKey = RedisPolicy.FEED_COMMENT_LIKE_SET_KEY_PREFIX + comment.getId();
             int likeCount = redisDao.getSetSize(likeSetKey);
             boolean isLiked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
@@ -574,19 +572,16 @@ public class FeedService {
                     replyCount
             );
         });
+        return CustomPageResponse.of(results);
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedCommentResponseDto> getReplies(Long parentId, int page, int size, Long userId) {
+    public CustomPageResponse<FeedCommentResponseDto> getReplies(Long parentId, Long userId, Pageable pageable) {
         FeedComment parent = feedCommentRepository.findById(parentId)
                 .orElseThrow(() -> new FeedException(ErrorCode.COMMENT_NOT_FOUND));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").ascending());
         Page<FeedComment> replies = feedCommentRepository.findByParentAndIsDeletedFalse(parent, pageable);
-
-        return replies.map(reply -> {
+        Page<FeedCommentResponseDto> results = replies.map(reply ->
+        {
             String likeSetKey = RedisPolicy.FEED_COMMENT_LIKE_SET_KEY_PREFIX + reply.getId();
             int likeCount = redisDao.getSetSize(likeSetKey);
             boolean isLiked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
@@ -604,6 +599,7 @@ public class FeedService {
                     0
             );
         });
+        return CustomPageResponse.of(results);
     }
 
 }

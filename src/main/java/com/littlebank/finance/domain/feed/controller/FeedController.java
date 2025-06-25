@@ -176,23 +176,25 @@ public class FeedController {
 
     @Operation(summary = "피드의 최상위 댓글 목록 조회")
     @GetMapping("/{feedId}/comments")
-    public ResponseEntity<Page<FeedCommentResponseDto>> getTopLevelComments(
+    public ResponseEntity<CustomPageResponse<FeedCommentResponseDto>> getTopLevelComments(
             @PathVariable Long feedId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestParam(name = "pageNumber") Integer pageNumber,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        return ResponseEntity.ok(feedService.getTopLevelComments(feedId, page, size, customUserDetails.getId()));
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedCommentResponseDto> response = feedService.getTopLevelComments(feedId, user.getId(), pageable);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "특정 댓글의 대댓글 목록 조회")
     @GetMapping("/comment/{parentId}/replies")
-    public ResponseEntity<Page<FeedCommentResponseDto>> getRepliesByParent(
+    public ResponseEntity<CustomPageResponse<FeedCommentResponseDto>> getRepliesByParent(
             @PathVariable Long parentId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestParam(name = "pageNumber") Integer pageNumber,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        return ResponseEntity.ok(feedService.getReplies(parentId, page, size, customUserDetails.getId()));
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedCommentResponseDto> response = feedService.getReplies(parentId, user.getId(), pageable);
+        return ResponseEntity.ok(response);
     }
 }
