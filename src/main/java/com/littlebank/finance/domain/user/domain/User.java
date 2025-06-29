@@ -70,7 +70,8 @@ public class User extends BaseEntity {
     private Subscription subscription;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private TrialSubscription trialSubscription;
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserConsent userConsent;
     @Builder
     public User(
             String email, String password, String name, String statusMessage, String phone, String rrn, String bankName,

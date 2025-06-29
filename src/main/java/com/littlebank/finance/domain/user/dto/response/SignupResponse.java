@@ -16,13 +16,15 @@ public class SignupResponse {
     private String email;
     private UserRole role;
     private Authority authority;
+    private Boolean isActive;
 
-    public static SignupResponse of(User user) {
+    public static SignupResponse of(User user, Boolean isActive) {
         return SignupResponse.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .role(user.getRole())
                 .authority(user.getAuthority())
+                .isActive(isActive)
                 .build();
     }
 }

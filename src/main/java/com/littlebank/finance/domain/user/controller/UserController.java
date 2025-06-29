@@ -33,7 +33,7 @@ public class UserController {
     public ResponseEntity<SignupResponse> saveUser(
             @RequestBody @Valid SignupRequest request
     ) {
-        SignupResponse response = userService.saveUser(request.toEntity(Authority.USER));
+        SignupResponse response = userService.saveUser(request, Authority.USER);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

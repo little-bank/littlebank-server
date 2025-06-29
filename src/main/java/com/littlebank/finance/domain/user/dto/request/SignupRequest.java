@@ -3,6 +3,7 @@ package com.littlebank.finance.domain.user.dto.request;
 
 import com.littlebank.finance.domain.user.domain.Authority;
 import com.littlebank.finance.domain.user.domain.User;
+import com.littlebank.finance.domain.user.domain.UserConsent;
 import com.littlebank.finance.domain.user.domain.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -42,6 +43,9 @@ public class SignupRequest {
     @NotNull
     @Schema(description = "유저 역할", example = "PARENT or CHILD or TEACHER")
     private UserRole role;
+    @NotNull
+    @Schema(description = "수신 동의", example = "true")
+    private Boolean isActive;
 
     public User toEntity(Authority authority) {
         return User.builder()
@@ -58,4 +62,10 @@ public class SignupRequest {
                 .authority(authority)
                 .build();
     }
-}
+
+    public UserConsent toUserConsentEntity(User user) {
+        return UserConsent.builder()
+                .user(user)
+                .isActive(isActive)
+                .build();
+    }}
