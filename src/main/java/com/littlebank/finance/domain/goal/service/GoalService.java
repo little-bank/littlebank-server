@@ -21,6 +21,7 @@ import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import com.littlebank.finance.global.firebase.FirebaseService;
+import com.littlebank.finance.global.firebase.record.NotificationToSend;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -66,7 +67,13 @@ public class GoalService {
                                 .targetId(goal.getId())
                                 .isRead(false)
                                 .build());
-                        firebaseService.sendNotification(notification);
+                        firebaseService.sendNotification(
+                                new NotificationToSend(
+                                        notification.getMessage(),
+                                        notification.getSubMessage(),
+                                        notification.getReceiver().getFcmToken()
+                                )
+                        );
                     });
         } catch (DataIntegrityViolationException e) {
             log.warn("이미 동일한 알림이 존재합니다.");

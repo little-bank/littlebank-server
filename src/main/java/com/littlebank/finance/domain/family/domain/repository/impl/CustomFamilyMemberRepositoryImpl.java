@@ -85,8 +85,8 @@ public class CustomFamilyMemberRepositoryImpl implements CustomFamilyMemberRepos
     public List<FamilyMember> findParentsByFamilyId(Long familyId) {
         return queryFactory
                 .selectFrom(m)
-                .join(u).on(u.id.eq(m.user.id)).fetchJoin()
                 .join(f).on(f.id.eq(m.family.id)).fetchJoin()
+                .join(u).on(u.id.eq(m.user.id)).fetchJoin()
                 .where(f.id.eq(familyId)
                         .and(m.status.eq(Status.JOINED))
                         .and(u.role.eq(UserRole.PARENT))
