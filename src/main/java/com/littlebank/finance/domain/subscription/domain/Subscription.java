@@ -12,7 +12,9 @@ import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -34,7 +36,7 @@ public class Subscription extends BaseEntity {
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> members = new ArrayList<>();
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InviteCode> inviteCodes = new ArrayList<>();
+    private Set<InviteCode> inviteCodes = new HashSet<>();
 
     @Builder
     public Subscription(Long id, User owner, int seat, LocalDateTime startDate, LocalDateTime endDate) {

@@ -13,6 +13,7 @@ import com.littlebank.finance.domain.notification.domain.repository.Notification
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
+import com.littlebank.finance.global.common.CustomPageResponse;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import com.littlebank.finance.global.firebase.FirebaseService;
 import com.littlebank.finance.global.redis.RedisDao;
@@ -150,51 +151,38 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getFeedsOrderByTime(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
+    public CustomPageResponse<FeedResponseDto> getFeedsOrderByTime(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-        return feedRepositoryCustom.findAllByFiltersOrderByTime(gradeCategory, subjectCategory, tagCategory, pageable)
-                .map(feed -> {
-                    List<FeedImage> images = feedImageRepository.findByFeed(feed);
+        Page<FeedResponseDto> feedPage = feedRepositoryCustom.findAllByFiltersOrderByTime(gradeCategory, subjectCategory, tagCategory, pageable)
+                .map(feed -> toFeedResponseDto(feed, userId));
 
-                    String likeSetKey = RedisPolicy.FEED_LIKE_SET_KEY_PREFIX + feed.getId();
-                    boolean liked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
-                    int likeCount = redisDao.getSetSize(likeSetKey);
-                    return FeedResponseDto.of(feed, images, likeCount, liked);
-                });
+        return CustomPageResponse.of(feedPage);
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getFeedsOrderByLikes(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
+    public CustomPageResponse<FeedResponseDto> getFeedsOrderByLikes(Long userId, GradeCategory gradeCategory, SubjectCategory subjectCategory, TagCategory tagCategory, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-        return feedRepositoryCustom.findAllByFiltersOrderByLikes(gradeCategory, subjectCategory, tagCategory, pageable)
-                .map(feed -> {
-                    List<FeedImage> images = feedImageRepository.findByFeed(feed);
-
-                    String likeSetKey = RedisPolicy.FEED_LIKE_SET_KEY_PREFIX + feed.getId();
-                    boolean liked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
-                    int likeCount = redisDao.getSetSize(likeSetKey);
-                    return FeedResponseDto.of(feed, images, likeCount, liked);
-                });
+        Page<FeedResponseDto> feedPage =  feedRepositoryCustom.findAllByFiltersOrderByLikes(gradeCategory, subjectCategory, tagCategory, pageable)
+                .map(feed ->toFeedResponseDto(feed, userId));
+        return CustomPageResponse.of(feedPage);
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getFeedsByUser(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-
-        Page<Feed> feeds = feedRepository.findByUserId(userId, pageable);
-        return feeds.map(feed -> {
-            List<FeedImage> images = feedImageRepository.findByFeed(feed);
-
-            String likeSetKey = RedisPolicy.FEED_LIKE_SET_KEY_PREFIX + feed.getId();
-            boolean liked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
-            int likeCount = redisDao.getSetSize(likeSetKey);
-            return FeedResponseDto.of(feed, images, likeCount, liked);
-        });
+    public CustomPageResponse<FeedResponseDto> getFeedsByUser(Long userId, Pageable pageable) {
+        Page<FeedResponseDto> feedPage = feedRepository.findByUserId(userId, pageable)
+                .map(feed -> toFeedResponseDto(feed, userId));
+        return CustomPageResponse.of(feedPage);
+    }
+    private FeedResponseDto toFeedResponseDto(Feed feed, Long userId) {
+        List<FeedImage> images = feedImageRepository.findByFeed(feed);
+        String likeSetKey = RedisPolicy.FEED_LIKE_SET_KEY_PREFIX + feed.getId();
+        boolean liked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
+        int likeCount = redisDao.getSetSize(likeSetKey);
+        return FeedResponseDto.of(feed, images, likeCount, liked);
     }
 
     public FeedResponseDto getFeedDetail(Long userId, Long feedId) {
@@ -559,13 +547,11 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedCommentResponseDto> getTopLevelComments(Long feedId, int page, int size, Long userId) {
+    public CustomPageResponse<FeedCommentResponseDto> getTopLevelComments(Long feedId, Long userId, Pageable pageable) {
         Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(() -> new FeedException(ErrorCode.FEED_NOT_FOUND));
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdDate"));
-        Page<FeedComment> commentPage = feedCommentRepository.findByFeedAndParentIsNullAndIsDeletedFalse(feed, pageable);
-
-        return commentPage.map(comment -> {
+        Page<FeedComment> result = feedCommentRepository.findByFeedAndParentIsNullAndIsDeletedFalse(feed, pageable);
+        Page<FeedCommentResponseDto> results = result.map(comment -> {
             String likeSetKey = RedisPolicy.FEED_COMMENT_LIKE_SET_KEY_PREFIX + comment.getId();
             int likeCount = redisDao.getSetSize(likeSetKey);
             boolean isLiked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
@@ -586,19 +572,16 @@ public class FeedService {
                     replyCount
             );
         });
+        return CustomPageResponse.of(results);
     }
 
     @Transactional(readOnly = true)
-    public Page<FeedCommentResponseDto> getReplies(Long parentId, int page, int size, Long userId) {
+    public CustomPageResponse<FeedCommentResponseDto> getReplies(Long parentId, Long userId, Pageable pageable) {
         FeedComment parent = feedCommentRepository.findById(parentId)
                 .orElseThrow(() -> new FeedException(ErrorCode.COMMENT_NOT_FOUND));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").ascending());
         Page<FeedComment> replies = feedCommentRepository.findByParentAndIsDeletedFalse(parent, pageable);
-
-        return replies.map(reply -> {
+        Page<FeedCommentResponseDto> results = replies.map(reply ->
+        {
             String likeSetKey = RedisPolicy.FEED_COMMENT_LIKE_SET_KEY_PREFIX + reply.getId();
             int likeCount = redisDao.getSetSize(likeSetKey);
             boolean isLiked = redisDao.isMemberOfSet(likeSetKey, userId.toString());
@@ -616,6 +599,7 @@ public class FeedService {
                     0
             );
         });
+        return CustomPageResponse.of(results);
     }
 
 }

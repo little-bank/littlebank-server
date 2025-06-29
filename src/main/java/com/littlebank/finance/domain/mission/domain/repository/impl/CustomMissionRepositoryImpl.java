@@ -1,8 +1,9 @@
-package com.littlebank.finance.domain.mission.domain.repository;
+package com.littlebank.finance.domain.mission.domain.repository.impl;
 
 import com.littlebank.finance.domain.family.domain.QFamilyMember;
 import com.littlebank.finance.domain.friend.domain.QFriend;
 import com.littlebank.finance.domain.mission.domain.QMission;
+import com.littlebank.finance.domain.mission.domain.repository.CustomMissionRepository;
 import com.littlebank.finance.domain.mission.dto.response.MissionStatDto;
 import com.littlebank.finance.domain.notification.dto.response.MissionAchievementNotificationDto;
 import com.littlebank.finance.domain.user.domain.QUser;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
-public class CustomMissionRepositoryImpl implements CustomMissionRepository{
+public class CustomMissionRepositoryImpl implements CustomMissionRepository {
     private QFriend f = QFriend.friend;
     private QMission m = QMission.mission;
     private QUser u = QUser.user;

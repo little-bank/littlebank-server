@@ -4,12 +4,16 @@ import com.littlebank.finance.domain.goal.dto.request.GoalApplyRequest;
 import com.littlebank.finance.domain.goal.dto.request.GoalUpdateRequest;
 import com.littlebank.finance.domain.goal.dto.response.*;
 import com.littlebank.finance.domain.goal.service.GoalService;
+import com.littlebank.finance.global.common.CustomPageResponse;
+import com.littlebank.finance.global.common.PaginationPolicy;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,10 +49,12 @@ public class GoalController {
 
     @Operation(summary = "(아이)내 모든 목표 조회 API")
     @GetMapping("/child/all")
-    public ResponseEntity<List<MyGoalResponse>> getMyGoals(
+    public ResponseEntity<CustomPageResponse<MyGoalResponse>> getMyGoals(
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        List<MyGoalResponse> responses = goalService.getMyGoals(customUserDetails.getId());
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<MyGoalResponse> responses = goalService.getMyGoals(customUserDetails.getId(), pageable);
         return ResponseEntity.ok(responses);
     }
 
@@ -74,11 +80,13 @@ public class GoalController {
 
     @Operation(summary = "(부모)이번 주 아이들의 목표 조회 API")
     @GetMapping("/parent/weekly/{familyId}")
-    public ResponseEntity<List<ChildGoalResponse>> getChildWeeklyGoal(
+    public ResponseEntity<CustomPageResponse<ChildGoalResponse>> getChildWeeklyGoal(
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @Parameter(description = "목표를 조회할 가족 식별 id")
             @PathVariable("familyId") Long familyId
     ) {
-        List<ChildGoalResponse> response = goalService.getChildWeeklyGoal(familyId);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<ChildGoalResponse> response = goalService.getChildWeeklyGoal(familyId, pageable);
         return ResponseEntity.ok(response);
     }
 

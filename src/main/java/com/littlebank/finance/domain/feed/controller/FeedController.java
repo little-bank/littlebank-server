@@ -7,11 +7,14 @@ import com.littlebank.finance.domain.feed.dto.request.FeedCommentRequestDto;
 import com.littlebank.finance.domain.feed.dto.request.FeedRequestDto;
 import com.littlebank.finance.domain.feed.dto.response.*;
 import com.littlebank.finance.domain.feed.service.FeedService;
+import com.littlebank.finance.global.common.CustomPageResponse;
+import com.littlebank.finance.global.common.PaginationPolicy;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,38 +57,41 @@ public class FeedController {
 
     @Operation(summary = "피드 전체 목록 조회")
     @GetMapping
-    public ResponseEntity<Page<FeedResponseDto>> getFeeds (
+    public ResponseEntity<CustomPageResponse<FeedResponseDto>> getFeeds (
             @RequestParam(required = false) GradeCategory gradeCategory,
             @RequestParam(required = false) SubjectCategory subjectCategory,
             @RequestParam(required = false) TagCategory tagCategory,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable,
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
-        Page<FeedResponseDto> response = feedService.getFeedsOrderByTime(customUserDetails.getId() ,gradeCategory, subjectCategory, tagCategory, pageable);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedResponseDto> response = feedService.getFeedsOrderByTime(customUserDetails.getId() ,gradeCategory, subjectCategory, tagCategory, pageable);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "피드 좋아요 순 전체 목록 조회")
     @GetMapping("/likes")
-    public ResponseEntity<Page<FeedResponseDto>> getFeedsOrderByLikes (
+    public ResponseEntity<CustomPageResponse<FeedResponseDto>> getFeedsOrderByLikes (
             @RequestParam(required = false) GradeCategory gradeCategory,
             @RequestParam(required = false) SubjectCategory subjectCategory,
             @RequestParam(required = false) TagCategory tagCategory,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable,
+            @RequestParam(name = "pageNumber") Integer pageNumber,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        Page<FeedResponseDto> feeds = feedService.getFeedsOrderByLikes(customUserDetails.getId(), gradeCategory, subjectCategory, tagCategory, pageable);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedResponseDto> feeds = feedService.getFeedsOrderByLikes(customUserDetails.getId(), gradeCategory, subjectCategory, tagCategory, pageable);
         return ResponseEntity.ok(feeds);
     }
 
 
     @Operation(summary = "내가 쓴 피드 조회")
     @GetMapping("/my")
-    public ResponseEntity<Page<FeedResponseDto>> getMyFeeds (
+    public ResponseEntity<CustomPageResponse<FeedResponseDto>> getMyFeeds (
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(name = "pageNumber") Integer pageNumber
     ) {
-        Page<FeedResponseDto> response = feedService.getFeedsByUser(customUserDetails.getId(), pageable);
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedResponseDto> response = feedService.getFeedsByUser(customUserDetails.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -170,23 +176,25 @@ public class FeedController {
 
     @Operation(summary = "피드의 최상위 댓글 목록 조회")
     @GetMapping("/{feedId}/comments")
-    public ResponseEntity<Page<FeedCommentResponseDto>> getTopLevelComments(
+    public ResponseEntity<CustomPageResponse<FeedCommentResponseDto>> getTopLevelComments(
             @PathVariable Long feedId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestParam(name = "pageNumber") Integer pageNumber,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        return ResponseEntity.ok(feedService.getTopLevelComments(feedId, page, size, customUserDetails.getId()));
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedCommentResponseDto> response = feedService.getTopLevelComments(feedId, user.getId(), pageable);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "특정 댓글의 대댓글 목록 조회")
     @GetMapping("/comment/{parentId}/replies")
-    public ResponseEntity<Page<FeedCommentResponseDto>> getRepliesByParent(
+    public ResponseEntity<CustomPageResponse<FeedCommentResponseDto>> getRepliesByParent(
             @PathVariable Long parentId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestParam(name = "pageNumber") Integer pageNumber,
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        return ResponseEntity.ok(feedService.getReplies(parentId, page, size, customUserDetails.getId()));
+        Pageable pageable = PageRequest.of(pageNumber, PaginationPolicy.GENERAL_PAGE_SIZE);
+        CustomPageResponse<FeedCommentResponseDto> response = feedService.getReplies(parentId, user.getId(), pageable);
+        return ResponseEntity.ok(response);
     }
 }

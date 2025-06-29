@@ -1,8 +1,9 @@
-package com.littlebank.finance.domain.challenge.domain.repository;
+package com.littlebank.finance.domain.challenge.domain.repository.impl;
 
 import com.littlebank.finance.domain.challenge.domain.Challenge;
 import com.littlebank.finance.domain.challenge.domain.ChallengeCategory;
 import com.littlebank.finance.domain.challenge.domain.QChallenge;
+import com.littlebank.finance.domain.challenge.domain.repository.ChallengeRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

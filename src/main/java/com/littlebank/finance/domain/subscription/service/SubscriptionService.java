@@ -15,8 +15,12 @@ import com.littlebank.finance.domain.subscription.exception.SubscriptionExceptio
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
 import com.littlebank.finance.domain.user.exception.UserException;
+import com.littlebank.finance.global.common.CustomPageResponse;
 import com.littlebank.finance.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -68,20 +72,13 @@ public class SubscriptionService {
         return SubscriptionResponseDto.of(subscription);
     }
 
-    public List<SubscriptionResponseDto> getMySubscription(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-        List<Subscription> subscriptions = new ArrayList<>();
-        List<Subscription> owned = subscriptionRepository.findByOwner(user);
-        subscriptions.addAll(owned);
-
-        if (user.getSubscription() != null && !owned.contains(user.getSubscription())) {
-            subscriptions.add(user.getSubscription());
-        }
-        subscriptions.sort((a,b) -> b.getStartDate().compareTo(a.getStartDate()));
-        return subscriptions.stream()
-                .map(s -> SubscriptionResponseDto.of(s))
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public CustomPageResponse<SubscriptionResponseDto> getMySubscription(Long userId, Pageable pageable) {
+        Page<Subscription> page = subscriptionRepository.findSubscriptionsByUserId(userId, pageable);
+        List<SubscriptionResponseDto> results = page.stream()
+                .map(SubscriptionResponseDto::of)
+                .toList();
+        return CustomPageResponse.of(new PageImpl<>(results, pageable, results.size()));
     }
 
     public SubscriptionResponseDto redeemSubscription(Long userId, String code) {
