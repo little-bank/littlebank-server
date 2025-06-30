@@ -344,6 +344,7 @@ public class FeedService {
                         .isRead(false)
                         .build();
                 notificationRepository.save(notification);
+                firebaseService.sendNotification(notification);
             } catch (DataIntegrityViolationException e) {
                 log.warn("이미 동일한 알림이 존재합니다.");
             }
@@ -401,6 +402,7 @@ public class FeedService {
                         .isRead(false)
                         .build();
                 notificationRepository.save(notification);
+                firebaseService.sendNotification(notification);
             } catch (DataIntegrityViolationException e) {
                 log.warn("이미 동일한 알림이 존재합니다.");
             }
@@ -516,6 +518,7 @@ public class FeedService {
                         .isRead(false)
                         .build();
                 notificationRepository.save(notification);
+                firebaseService.sendNotification(notification);
             } catch (DataIntegrityViolationException e) {
                 log.warn("이미 동일한 알림이 존재합니다.");
             }

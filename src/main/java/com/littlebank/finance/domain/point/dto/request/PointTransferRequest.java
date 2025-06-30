@@ -17,9 +17,8 @@ public class PointTransferRequest {
     @Schema(description = "이체 메시지(메시지가 없다면 공백)")
     private String message;
     @NotNull
-    @Schema(description = "미션/챌린지/목표 중 하나")
+    @Schema(description = "미션/챌린지/목표/일반 중 하나")
     private RewardType rewardType;
-    @NotNull
     @Schema(description = "포인트를 지급한 미션/챌린지/목표의 id")
     private Long rewardId;
 }

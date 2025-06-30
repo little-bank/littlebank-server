@@ -48,6 +48,8 @@ public class GoalService {
     public CommonGoalResponse applyGoal(Long userId, GoalApplyRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+        String childNickName = familyMemberRepository.findChildNickNameByChildId(userId);
+        log.info(String.format("Applying goal to user %s", childNickName));
         verifyDuplicateGoalCategory(user.getId(), request.getCategory(), request.getStartDate());
 
         Family family = familyRepository.findByUserIdWithMember(userId)
@@ -61,7 +63,7 @@ public class GoalService {
                     .forEach(p -> {
                         Notification notification = notificationRepository.save(Notification.builder()
                                 .receiver(p.getUser())
-                                .message(family.getMembers().get(0).getNickname() + "(이)가 목표 승인을 요청했어요!")
+                                .message(childNickName + "(이)가 목표 승인을 요청했어요!")
                                 .type(NotificationType.GOAL_PROPOSAL)
                                 .targetId(goal.getId())
                                 .isRead(false)

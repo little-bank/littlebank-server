@@ -152,4 +152,16 @@ public class CustomFamilyMemberRepositoryImpl implements CustomFamilyMemberRepos
                 )
                 .fetch();
     }
+
+    @Override
+    public String findChildNickNameByChildId(Long childId) {
+        return queryFactory
+                .select(m.nickname)
+                .from(m)
+                .where(
+                        m.user.id.eq(childId),
+                        m.status.eq(Status.JOINED)
+                )
+                .fetchFirst();
+    }
 }

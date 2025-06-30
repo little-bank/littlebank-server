@@ -22,7 +22,7 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 10)
     private NotificationType type;
-    @Column(name = "target_id", nullable = false)
+    @Column(name = "target_id", nullable = true)
     private Long targetId;
     @Column(name = "message", length = 100, nullable = false)
     private String message;

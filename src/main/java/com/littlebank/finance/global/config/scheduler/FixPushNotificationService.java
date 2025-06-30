@@ -44,11 +44,10 @@ public class FixPushNotificationService {
         try {
             results.stream()
                     .forEach(r -> {
-                        // 부모에게
                         User parent = userRepository.findById(r.getParentId())
                                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-                        Notification parentNotification = notificationRepository.save(Notification.builder()
+                        Notification notification = notificationRepository.save(Notification.builder()
                                 .receiver(parent)
                                 .message("지난 주, " + r.getNickname() + "(이)가 \"" + r.getTitle() + "\" 목표를 " + (r.getStampCount() * 100 / 7) + "% 달성했어요!")
                                 .subMessage("앱에서 아이에게 약속한 보상을 주세요~!")
@@ -56,22 +55,35 @@ public class FixPushNotificationService {
                                 .targetId(r.getGoalId())
                                 .isRead(false)
                                 .build());
-                        firebaseService.sendNotification(parentNotification);
-
-                        // 아이에게
-                        User child = userRepository.findById(r.getChildId())
-                                .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-                        Notification childNotification = notificationRepository.save(Notification.builder()
-                                .receiver(child)
-                                .message(r.getNickname() + "님 새로운 목표에 도전하세요!")
-                                .subMessage("이번주에도 힘내서 목표를 향해 나아가요~")
-                                .type(NotificationType.SUGGEST_NEW_GOAL)
-                                .isRead(false)
-                                .build());
-                        firebaseService.sendNotification(childNotification);
+                        firebaseService.sendNotification(notification);
                     });
         } catch (DataIntegrityViolationException e) {
             log.warn("이미 동일한 알림이 존재합니다.");
+        }
+        return results;
+    }
+
+    public List<SuggestChildDto> suggestNewWeeklyGoalToChildren() {
+        List<User> children = userRepository.findAllByRoleAndIsDeletedFalse(UserRole.CHILD);
+        List<SuggestChildDto> results = new ArrayList<>();
+        try {
+            children.forEach(child -> {
+                Notification notification = notificationRepository.save(Notification.builder()
+                        .receiver(child)
+                        .message(child.getName() + "님, 이번 주에도 새로운 목표에 도전하세요!")
+                        .subMessage("달성하고 보상을 받아보세요!")
+                        .type(NotificationType.SUGGEST_NEW_GOAL)
+                        .isRead(false)
+                        .build());
+                firebaseService.sendNotification(notification);
+
+                results.add(new SuggestChildDto(
+                        child.getId(),
+                        child.getName()
+                ));
+            });
+        } catch (DataIntegrityViolationException e) {
+            log.warn("중복 알림 생략 또는 전송 실패가 발생했습니다.");
         }
         return results;
     }
@@ -84,9 +96,10 @@ public class FixPushNotificationService {
         challengeParticipationRepository.saveAll(expiredChallenges);
     }
 
-    public AchievementNotificationResultDto notifyParentsOfCompletedMissionsAndChallenges() {
+    public List<MissionAchievementNotificationDto> notifyParentsOfCompletedMissions() {
         // 완료된 미션 알림
         List<MissionAchievementNotificationDto> missionResults = missionRepository.findMissionAchievementNotificationDto();
+        log.info("완료된 미션 알림 개수: ", missionResults.size());
         try {
             missionResults.stream().forEach(
                     r -> {
@@ -106,9 +119,13 @@ public class FixPushNotificationService {
         } catch (DataIntegrityViolationException e) {
             log.warn("이미 동일한 알림이 존재합니다.");
         }
+        return missionResults;
+    }
 
-        // 완료된 챌린지 알림
+
+    public List<ChallengeAchievementNotificationDto> notifyParentsOfCompletedChallenges() {
         List<ChallengeAchievementNotificationDto> challengeResults = challengeParticipationRepository.findChallengeAchievementNotificationDto();
+        log.info("완료된 챌린지 개수: ", challengeResults.size());
         try {
             challengeResults.stream().forEach(
                     r -> {
@@ -128,7 +145,7 @@ public class FixPushNotificationService {
         } catch (DataIntegrityViolationException e) {
             log.warn("이미 동일한 알림이 존재합니다.");
         }
-        return new AchievementNotificationResultDto(missionResults, challengeResults);
+        return challengeResults;
     }
 
 
@@ -152,7 +169,6 @@ public class FixPushNotificationService {
                             .receiver(parent)
                             .message(child.getNickname() + "에게 새로운 미션을 주세요!")
                             .type(NotificationType.SUGGEST_MISSION_CREATION)
-                            .targetId(child.getUser().getId())
                             .isRead(false)
                             .build());
                     firebaseService.sendNotification(notification);
