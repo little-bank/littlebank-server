@@ -29,6 +29,7 @@ import java.util.List;
 public class PointController {
     private final PointService pointService;
 
+    @Operation(summary = "포인트 충전 금액 임시 저장 API")
     @PostMapping("/temp/save-amount")
     public ResponseEntity<AmountTempSaveResponse> tempSave(
             HttpSession session,
@@ -37,6 +38,22 @@ public class PointController {
     ) {
         session.setAttribute(saveAmountRequest.getOrderId(), saveAmountRequest.getAmount());
         return ResponseEntity.ok(pointService.tempSave(customUserDetails.getId(), saveAmountRequest));
+    }
+
+    @Operation(summary = "임시 저장한 포인트 충전 금액 검증 API")
+    @PostMapping("/temp/verify-amount")
+    public ResponseEntity<VerifyTempSaveAmountResponse> verifyTempSaveAmount(
+            HttpSession session,
+            @RequestBody @Valid AmountTempSaveRequest saveAmountRequest,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        Integer amount = (Integer) session.getAttribute(saveAmountRequest.getOrderId());
+
+        if(amount == null || !amount.equals(saveAmountRequest.getAmount()))
+            return ResponseEntity.badRequest().body(VerifyTempSaveAmountResponse.builder().code(400).message("결제 금액 정보가 유효하지 않습니다.").build());
+
+        session.removeAttribute(saveAmountRequest.getOrderId());
+        return ResponseEntity.ok(VerifyTempSaveAmountResponse.builder().code(200).message("결제 금액 정보가 일치합니다.").build());
     }
 
     @Operation(summary = "포인트 충전 내역 조회 API")
