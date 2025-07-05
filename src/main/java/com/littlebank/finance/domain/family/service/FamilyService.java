@@ -39,6 +39,7 @@ public class FamilyService {
     private final FamilyMemberRepository familyMemberRepository;
     private final FirebaseService firebaseService;
     private final NotificationRepository notificationRepository;
+
     public FamilyMemberAddResponse addFamilyMember(Long userId, FamilyMemberAddRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));

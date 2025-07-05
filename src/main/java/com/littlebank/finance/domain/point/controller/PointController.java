@@ -10,6 +10,7 @@ import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -28,14 +29,14 @@ import java.util.List;
 public class PointController {
     private final PointService pointService;
 
-    @Operation(summary = "포인트 충전 내역 저장 API")
-    @PostMapping("/charge/payment/info")
-    public ResponseEntity<PaymentInfoSaveResponse> verifyAndSave(
-        @RequestBody @Valid PaymentInfoSaveRequest request,
-        @AuthenticationPrincipal CustomUserDetails customUserDetails
+    @PostMapping("/temp/save-amount")
+    public ResponseEntity<AmountTempSaveResponse> tempSave(
+            HttpSession session,
+            @RequestBody @Valid AmountTempSaveRequest saveAmountRequest,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        PaymentInfoSaveResponse response = pointService.verifyAndSave(customUserDetails.getId(), request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        session.setAttribute(saveAmountRequest.getOrderId(), saveAmountRequest.getAmount());
+        return ResponseEntity.ok(pointService.tempSave(customUserDetails.getId(), saveAmountRequest));
     }
 
     @Operation(summary = "포인트 충전 내역 조회 API")
