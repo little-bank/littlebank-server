@@ -84,6 +84,17 @@ public class CustomGoalRepositoryImpl implements CustomGoalRepository {
     }
 
     public List<ChildGoalResponse> findChildWeeklyGoalResponses(Long familyId) {
+        NumberTemplate<Integer> stampCount = Expressions.numberTemplate(Integer.class,
+                "({0} + {1} + {2} + {3} + {4} + {5} + {6})",
+                g.mon.castToNum(Integer.class),
+                g.tue.castToNum(Integer.class),
+                g.wed.castToNum(Integer.class),
+                g.thu.castToNum(Integer.class),
+                g.fri.castToNum(Integer.class),
+                g.sat.castToNum(Integer.class),
+                g.sun.castToNum(Integer.class)
+        );
+
         return queryFactory
                 .select(Projections.constructor(
                         ChildGoalResponse.class,
@@ -95,7 +106,10 @@ public class CustomGoalRepositoryImpl implements CustomGoalRepository {
                         g.endDate,
                         g.status,
                         fm.id,
-                        fm.nickname
+                        fm.nickname,
+                        g.isRewarded,
+                        f.minStampCount,
+                        stampCount
                 ))
                 .from(g)
                 .join(g.family, f)
@@ -112,6 +126,17 @@ public class CustomGoalRepositoryImpl implements CustomGoalRepository {
     }
 
     public List<ChildGoalResponse> findAllChildGoalResponses(Long familyId) {
+        NumberTemplate<Integer> stampCount = Expressions.numberTemplate(Integer.class,
+                "({0} + {1} + {2} + {3} + {4} + {5} + {6})",
+                g.mon.castToNum(Integer.class),
+                g.tue.castToNum(Integer.class),
+                g.wed.castToNum(Integer.class),
+                g.thu.castToNum(Integer.class),
+                g.fri.castToNum(Integer.class),
+                g.sat.castToNum(Integer.class),
+                g.sun.castToNum(Integer.class)
+        );
+
         return queryFactory
                 .select(Projections.constructor(
                         ChildGoalResponse.class,
@@ -123,7 +148,10 @@ public class CustomGoalRepositoryImpl implements CustomGoalRepository {
                         g.endDate,
                         g.status,
                         fm.id,
-                        fm.nickname
+                        fm.nickname,
+                        g.isRewarded,
+                        f.minStampCount,
+                        stampCount
                 ))
                 .from(g)
                 .join(g.family, f)

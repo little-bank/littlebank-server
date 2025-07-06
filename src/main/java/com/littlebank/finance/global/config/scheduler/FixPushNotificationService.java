@@ -50,7 +50,7 @@ public class FixPushNotificationService {
                         Notification notification = notificationRepository.save(Notification.builder()
                                 .receiver(parent)
                                 .message("지난 주, " + r.getNickname() + "(이)가 \"" + r.getTitle() + "\" 목표를 " + (r.getStampCount() * 100 / 7) + "% 달성했어요!")
-                                .subMessage("앱에서 아이에게 약속한 보상을 주세요~!")
+                                .subMessage("앱에서 확인해보세요~!")
                                 .type(NotificationType.GOAL_ACHIEVEMENT)
                                 .targetId(r.getGoalId())
                                 .isRead(false)

@@ -238,6 +238,8 @@ public class PointService {
                         .build()
         );
 
+        goal.reward();
+
         try {
             Notification receiverNotification = notificationRepository.save(
                     Notification.builder()
@@ -253,6 +255,7 @@ public class PointService {
         } catch (DataIntegrityViolationException e) {
             log.warn("이미 동일한 알림이 존재합니다.");
         }
+
         return CommonPointTransferResponse.of(transactionHistory);
     }
     @Transactional(readOnly = true)

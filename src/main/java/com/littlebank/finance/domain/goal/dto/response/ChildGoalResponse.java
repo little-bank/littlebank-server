@@ -19,4 +19,7 @@ public class ChildGoalResponse {
     private GoalStatus status;
     private Long familyMemberId;
     private String childNickname;
+    private Boolean isRewarded;
+    private Integer minStampCount;
+    private Integer stampCount;
 }
