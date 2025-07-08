@@ -167,6 +167,10 @@ public class User extends BaseEntity {
     public void setTargetAmount(int targetAmount) {
         this.targetAmount = targetAmount;
     }
+
+    public void setTargetAmountNull () {
+        this.targetAmount = null;
+    }
   
     public void withdraw() {
         this.email = "removed" + this.id;

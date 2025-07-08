@@ -13,6 +13,7 @@ import com.littlebank.finance.domain.notification.domain.NotificationType;
 import com.littlebank.finance.domain.notification.domain.repository.NotificationRepository;
 import com.littlebank.finance.domain.notification.dto.GoalAchievementNotificationDto;
 import com.littlebank.finance.domain.notification.dto.response.*;
+import com.littlebank.finance.domain.ranking.dto.response.TargetAmountResetDto;
 import com.littlebank.finance.domain.user.domain.User;
 import com.littlebank.finance.domain.user.domain.constant.UserRole;
 import com.littlebank.finance.domain.user.domain.repository.UserRepository;
@@ -211,4 +212,14 @@ public class FixPushNotificationService {
         return results;
 
     }
+
+    public List<TargetAmountResetDto> initializeMonthlyTargetAmounts() {
+        List<TargetAmountResetDto> targetUsers = userRepository.findAllByTargetAmountIsNotNull();
+        List<Long> idsToReset = targetUsers.stream().map(TargetAmountResetDto::getUserId).toList();
+        List<User> users = userRepository.findAllById(idsToReset);
+        users.forEach(User::setTargetAmountNull);
+        userRepository.saveAll(users);
+        return targetUsers;
+    }
+
 }

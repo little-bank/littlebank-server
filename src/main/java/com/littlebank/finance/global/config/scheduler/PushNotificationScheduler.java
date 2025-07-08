@@ -36,6 +36,12 @@ public class PushNotificationScheduler {
         fixPushNotificationService.suggestNewWeeklyGoalToChildren();
     }
 
+    /**
+     * DB UPDATE
+     * [미션 및 챌린지 상태 ACHIEVEMENT로 업데이트]
+     * 매일 0시
+     * 기간이 지난 미션 및 챌린지를 상태 완료로 업데이트
+     */
     @Scheduled(cron = "0 0 0 * * *")
     //@Scheduled(cron = "0 */2 * * * *")
     public void updateStatusAtMidnight() {
@@ -86,5 +92,15 @@ public class PushNotificationScheduler {
     public void suggestChallengeToChildren() {
         fixPushNotificationService.suggestChildrenParticipateChallenge();
     }
+
+    /**
+     * DB UPDATE
+     * [목표금액대 초기화]
+     * 1일 0시
+     * 새로운 목표금액대 설정하기 위해 초기화
+     */
+    @Scheduled(cron = "0 0 0 1 * ?")
+    //@Scheduled(cron = "0 */2 * * * *")
+    public void initializeMonthlyTargetAmounts() { fixPushNotificationService.initializeMonthlyTargetAmounts(); }
 
 }

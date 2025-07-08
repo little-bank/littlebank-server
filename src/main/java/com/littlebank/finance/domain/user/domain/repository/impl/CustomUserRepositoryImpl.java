@@ -6,6 +6,7 @@ import com.littlebank.finance.domain.friend.domain.QFriend;
 import com.littlebank.finance.domain.friend.dto.response.CommonFriendInfoResponse;
 import com.littlebank.finance.domain.mission.domain.MissionStatus;
 import com.littlebank.finance.domain.mission.domain.QMission;
+import com.littlebank.finance.domain.ranking.dto.response.TargetAmountResetDto;
 import com.littlebank.finance.domain.user.domain.QUser;
 import com.littlebank.finance.domain.user.domain.repository.CustomUserRepository;
 import com.littlebank.finance.domain.user.dto.response.UserDetailsInfoResponse;
@@ -15,6 +16,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.littlebank.finance.domain.challenge.domain.QChallengeParticipation.challengeParticipation;
@@ -128,5 +130,17 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                         )
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<TargetAmountResetDto> findAllByTargetAmountIsNotNull() {
+        return queryFactory
+                .select(Projections.constructor(
+                        TargetAmountResetDto.class,
+                        u.id,
+                        u.name))
+                .from(u)
+                .where(u.targetAmount.isNotNull())
+                .fetch();
     }
 }
