@@ -15,6 +15,8 @@ public class UserInfoUpdateRequest {
     @NotBlank
     @Schema(description = "이름", example = "장태현")
     private String name;
+    @Schema(description = "학교명", example = "리뱅고등학교")
+    private String schoolName;
     @Schema(description = "은행 이름", example = "농협은행")
     private String bankName;
     @Schema(description = "은행 계좌 번호", example = "098765432123")
@@ -28,6 +30,7 @@ public class UserInfoUpdateRequest {
         return User.builder()
                 .email(email)
                 .name(name)
+                .schoolName(schoolName)
                 .bankName(bankName)
                 .bankAccount(bankAccount)
                 .bankCode(bankCode)
