@@ -2,8 +2,8 @@ package com.littlebank.finance.domain.subscription.domain.repository;
 
 import com.littlebank.finance.domain.subscription.domain.Subscription;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface CustomSubscriptionRepository {
-    Optional<Subscription> findTopByOwnerIdOrderByStartDateDesc(Long userId);
+    List<Subscription> findAllByUserId(Long userId);
 }

@@ -2,6 +2,7 @@ package com.littlebank.finance.domain.subscription.controller;
 
 import com.littlebank.finance.domain.subscription.dto.request.FreeSubscriptionRequestDto;
 import com.littlebank.finance.domain.subscription.dto.request.SubscriptionCreateRequestDto;
+import com.littlebank.finance.domain.subscription.dto.request.SubscriptionDeleteRequest;
 import com.littlebank.finance.domain.subscription.dto.request.SubscriptionPurchaseRequestDto;
 import com.littlebank.finance.domain.subscription.dto.response.FreeSubscriptionResponseDto;
 import com.littlebank.finance.domain.subscription.dto.response.InviteCodeResponseDto;
@@ -11,6 +12,7 @@ import com.littlebank.finance.domain.subscription.service.PurchaseService;
 import com.littlebank.finance.domain.subscription.service.SubscriptionService;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,6 +46,16 @@ public class SubscriptionController {
     ) {
         List<SubscriptionResponseDto> response = subscriptionService.getMySubscription(user.getId());
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "구독 삭제")
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteSubscription(
+            @RequestBody @Valid SubscriptionDeleteRequest request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        subscriptionService.deleteSubscription(user.getId(), request);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "구독 코드 등록")

@@ -17,7 +17,8 @@ import java.util.List;
 @Entity
 @Getter
 @Table(name = "subscription")
-
+@SQLDelete(sql = "UPDATE subscription SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Subscription extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,18 +38,26 @@ public class Subscription extends BaseEntity {
     private List<InviteCode> inviteCodes = new ArrayList<>();
     @Column(nullable = false, unique = true)
     private String purchaseToken;
+    @Column(nullable = false)
+    private Boolean isDeleted;
+
     @Builder
-    public Subscription(Long id, User owner, int seat, LocalDateTime startDate, LocalDateTime endDate, String purchaseToken) {
+    public Subscription(Long id, User owner, int seat, LocalDateTime startDate, LocalDateTime endDate, String purchaseToken, Boolean isDeleted) {
         this.id = id;
         this.owner = owner;
         this.seat = seat;
         this.startDate = startDate;
         this.endDate = endDate;
         this.purchaseToken = purchaseToken;
+        this.isDeleted = isDeleted == null ? false : isDeleted;
     }
 
     public void addInviteCode(InviteCode inviteCode) {
         this.inviteCodes.add(inviteCode);
         inviteCode.setSubscription(this);
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }
