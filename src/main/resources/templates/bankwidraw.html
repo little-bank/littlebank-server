@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LittleBank 결제 관리 시스템</title>
+    <link rel="stylesheet" href="/css/widrawl.css">
+    <link rel="stylesheet" href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+    <header class="app-header">
+        <div class="app-header-logo">
+            <div class="logo">
+                    <span class="logo-icon">
+                        <img src="/logos/app_logo.png" alt="LittleBank Logo" />
+                    </span>
+                <h1 class="logo-title">
+                    <span>LittleBank</span>
+                    <span>결제관리시스템</span>
+                </h1>
+            </div>
+        </div>
+        <div class="app-header-navigation">
+            <div class="tabs">
+                <a href="#" class="active">
+                    대시보드
+                </a>
+                <a href="#" data-page="transactions">
+                    결제내역
+                </a>
+
+                <a href="#" data-page="charge-history">
+                    <i class="ph-plus-circle"></i>
+                    <span>충전 내역</span>
+                </a>
+                <a href="#" data-page="refund-history">
+                    <i class="ph-minus-circle"></i>
+                    <span>환전 내역</span>
+                </a>
+
+                <a href="#" data-page="reports">
+                    보고서
+                </a>
+                <a href="#" data-page="settings">
+                    설정
+                </a>
+            </div>
+        </div>
+        <div class="app-header-actions">
+            <button class="user-profile">
+                <span>결제담당 김철수</span>
+                <span>
+                        <i class="ph-user-circle"></i>
+                    </span>
+            </button>
+            <div class="app-header-actions-buttons">
+                <button class="icon-button large" title="검색">
+                    <i class="ph-magnifying-glass"></i>
+                </button>
+                <button class="icon-button large notification-btn" title="알림">
+                    <i class="ph-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+            </div>
+        </div>
+        <div class="app-header-mobile">
+            <button class="icon-button large">
+                <i class="ph-list"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <div class="app-body-navigation">
+            <nav class="navigation">
+                <a href="#" class="nav-active">
+                    <i class="ph-chart-pie"></i>
+                    <span>대시보드</span>
+                </a>
+                <a href="#" data-page="transactions">
+                    <i class="ph-swap"></i>
+                    <span>결제내역</span>
+                </a>
+                <a href="#" data-page="reports">
+                    <i class="ph-file-text"></i>
+                    <span>보고서</span>
+                </a>
+                <a href="#" data-page="settings">
+                    <i class="ph-gear"></i>
+                    <span>설정</span>
+                </a>
+            </nav>
+            <footer class="footer">
+                <h1>LittleBank<small>©</small></h1>
+                <div>
+                    LittleBank 결제관리시스템 ©<br />
+                    All Rights Reserved 2024
+                </div>
+            </footer>
+        </div>
+
+        <div class="app-body-main-content">
+            <!-- 대시보드 페이지 -->
+            <div id="dashboard-page" class="page active">
+                <section class="stats-section">
+                    <h2>오늘의 결제 현황</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="ph-trending-up"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="ph-trending-down"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="ph-swap"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="transaction-section">
+                    <div class="transaction-section-header">
+                        <h2>최근 결제 내역</h2>
+                        <div class="filter-options">
+                            <div class="date-filter">
+                                <input type="date" id="start-date" value="2024-01-01">
+                                <span>~</span>
+                                <input type="date" id="end-date" value="2024-01-31">
+                            </div>
+                            <select class="transaction-type-filter">
+                                <option value="all">전체</option>
+                                <option value="deposit">입금</option>
+                                <option value="withdraw">출금</option>
+                                <option value="transfer">이체</option>
+                            </select>
+                            <button class="flat-button">필터 적용</button>
+                        </div>
+                    </div>
+                    <div class="transactions-table">
+                        <div class="table-header">
+                            <div class="table-row">
+                                <div class="table-cell">결제시간</div>
+                                <div class="table-cell">사용자명</div>
+                                <div class="table-cell">계좌번호</div>
+                                <div class="table-cell">결제유형</div>
+                                <div class="table-cell">결제금액</div>
+                                <div class="table-cell">잔액</div>
+                                <div class="table-cell">상태</div>
+                            </div>
+                        </div>
+                        <div class="table-body">
+                            <!-- 실제 API 호출 후 JS로 데이터 렌더링 -->
+                        </div>
+                    </div>
+                    <div class="pagination">
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                        <span>...</span>
+                        <button class="page-btn">45</button>
+                    </div>
+                </section>
+            </div>
+
+
+
+            <!-- 거래내역 페이지 -->
+            <div id="transactions-page" class="page">
+                <section class="transactions-section">
+                    <div class="page-header">
+                        <h2>결제 내역 상세</h2>
+                        <div class="header-actions">
+                            <button class="flat-button">
+                                <i class="ph-download"></i>
+                                Excel 다운로드
+                            </button>
+                            <button class="flat-button">
+                                <i class="ph-file-pdf"></i>
+                                PDF 다운로드
+                            </button>
+                        </div>
+                    </div>
+                    <div class="advanced-filter">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label>결제일자</label>
+                                <div class="date-range">
+                                    <input type="date" value="2024-01-01">
+                                    <span>~</span>
+                                    <input type="date" value="2024-01-31">
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label>결제유형</label>
+                                <select>
+                                    <option value="all">전체</option>
+                                    <option value="deposit">입금</option>
+                                    <option value="withdraw">출금</option>
+                                    <option value="transfer">이체</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>금액범위</label>
+                                <div class="amount-range">
+                                    <input type="number" placeholder="최소금액">
+                                    <span>~</span>
+                                    <input type="number" placeholder="최대금액">
+                                </div>
+                            </div>
+                            <button class="flat-button primary">검색</button>
+                        </div>
+                    </div>
+                    <div class="transaction-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">총 결제 건수</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">총 입금액</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">총 출금액</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">순 결제액</span>
+                        </div>
+                    </div>
+                    <div class="detailed-transactions-table">
+                        <div class="table-header">
+                            <div class="table-row">
+                                <div class="table-cell">결제번호</div>
+                                <div class="table-cell">결제일시</div>
+                                <div class="table-cell">사용자정보</div>
+                                <div class="table-cell">결제유형</div>
+                                <div class="table-cell">결제금액</div>
+                                <div class="table-cell">수수료</div>
+                                <div class="table-cell">잔액</div>
+                                <div class="table-cell">상태</div>
+                                <div class="table-cell">상세</div>
+                            </div>
+                        </div>
+                        <div class="table-body">
+                            <!-- 실제 API 호출 후 JS로 데이터 렌더링 -->
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 보고서 페이지 -->
+            <div id="reports-page" class="page">
+                <section class="reports-section">
+                    <div class="page-header">
+                        <h2>보고서</h2>
+                        <div class="header-actions">
+                            <button class="flat-button">
+                                <i class="ph-file-pdf"></i>
+                                PDF 생성
+                            </button>
+                            <button class="flat-button">
+                                <i class="ph-file-excel"></i>
+                                Excel 생성
+                            </button>
+                        </div>
+                    </div>
+                    <div class="report-types">
+                    </div>
+                    <div class="recent-reports">
+                        <h3>최근 생성된 보고서</h3>
+                        <div class="reports-table">
+                            <div class="table-header">
+                                <div class="table-row">
+                                    <div class="table-cell">보고서명</div>
+                                    <div class="table-cell">유형</div>
+                                    <div class="table-cell">생성일시</div>
+                                    <div class="table-cell">파일크기</div>
+                                    <div class="table-cell">다운로드</div>
+                                </div>
+                            </div>
+                            <div class="table-body">
+                                <!-- 실제 API 호출 후 JS로 데이터 렌더링 -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- 충전 내역 페이지 -->
+            <div id="charge-history-page" class="page">
+                <section class="charge-section">
+                    <h2>충전 내역</h2>
+                    <input type="text" placeholder="이름으로 검색" id="charge-name-filter">
+                    <select id="charge-sort-order">
+                        <option value="desc">최신순</option>
+                        <option value="asc">오래된순</option>
+                    </select>
+                    <div class="transactions-table">
+                        <div class="table-header">
+                            <div class="table-row">
+                                <div class="table-cell">이름</div>
+                                <div class="table-cell">이메일</div>
+                                <div class="table-cell">충전 금액</div>
+                                <div class="table-cell">결제 수단</div>
+                                <div class="table-cell">충전일시</div>
+                            </div>
+                        </div>
+                        <div class="table-body" id="charge-table-body"></div>
+                    </div>
+                </section>
+            </div>
+            <!-- 환전 내역 페이지 -->
+            <div id="refund-history-page" class="page">
+                <section class="refund-section">
+                    <h2>환전 내역</h2>
+                    <select id="refund-status-filter">
+                        <option value="all">전체</option>
+                        <option value="WAITING">대기</option>
+                        <option value="PROCESSED">처리 완료</option>
+                    </select>
+                    <select id="refund-sort-order">
+                        <option value="desc">최신순</option>
+                        <option value="asc">오래된순</option>
+                    </select>
+                    <div class="transactions-table">
+                        <div class="table-header">
+                            <div class="table-row">
+                                <div class="table-cell">이름</div>
+                                <div class="table-cell">이메일</div>
+                                <div class="table-cell">환전 금액</div>
+                                <div class="table-cell">요청일시</div>
+                                <div class="table-cell">상태</div>
+                                <div class="table-cell">처리</div>
+                            </div>
+                        </div>
+                        <div class="table-body" id="refund-table-body"></div>
+                    </div>
+                </section>
+            </div>
+
+
+
+
+            <!-- 시스템설정 페이지 -->
+            <div id="settings-page" class="page">
+                <section class="settings-section">
+                    <div class="page-header">
+                        <h2>시스템 설정</h2>
+                        <button class="flat-button">
+                            <i class="ph-floppy-disk"></i>
+                            설정 저장
+                        </button>
+                    </div>
+                    <div class="settings-tabs">
+                        <div class="settings-tab-nav">
+                            <button class="tab-button active" data-tab="general">일반 설정</button>
+                            <button class="tab-button" data-tab="security">보안 설정</button>
+                            <button class="tab-button" data-tab="notifications">알림 설정</button>
+                            <button class="tab-button" data-tab="backup">백업 설정</button>
+                        </div>
+                        <div class="settings-tab-content">
+                            <div class="tab-panel active" id="general">
+                                <div class="settings-group">
+                                    <h3>시스템 기본 설정</h3>
+                                    <div class="setting-item">
+                                        <label>시스템 이름</label>
+                                        <input type="text" value="KB 은행 관리자 시스템" class="setting-input">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>세션 유지 시간 (분)</label>
+                                        <input type="number" value="30" class="setting-input">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>페이지당 표시 건수</label>
+                                        <select class="setting-input">
+                                            <option value="10">10개</option>
+                                            <option value="20" selected>20개</option>
+                                            <option value="50">50개</option>
+                                            <option value="100">100개</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>자동 로그아웃</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="auto-logout" checked>
+                                            <label for="auto-logout"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-panel" id="security">
+                                <div class="settings-group">
+                                    <h3>보안 설정</h3>
+                                    <div class="setting-item">
+                                        <label>최소 비밀번호 길이</label>
+                                        <input type="number" value="8" class="setting-input">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>비밀번호 복잡성 검사</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="password-complexity" checked>
+                                            <label for="password-complexity"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>로그인 실패 허용 횟수</label>
+                                        <input type="number" value="5" class="setting-input">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>IP 접근 제한</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="ip-restriction">
+                                            <label for="ip-restriction"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-panel" id="notifications">
+                                <div class="settings-group">
+                                    <h3>알림 설정</h3>
+                                    <div class="setting-item">
+                                        <label>이메일 알림</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="email-notifications" checked>
+                                            <label for="email-notifications"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>SMS 알림</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="sms-notifications">
+                                            <label for="sms-notifications"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>의심 거래 알림</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="suspicious-alerts" checked>
+                                            <label for="suspicious-alerts"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>시스템 점검 알림</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="maintenance-alerts" checked>
+                                            <label for="maintenance-alerts"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-panel" id="backup">
+                                <div class="settings-group">
+                                    <h3>백업 설정</h3>
+                                    <div class="setting-item">
+                                        <label>자동 백업</label>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="auto-backup" checked>
+                                            <label for="auto-backup"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>백업 주기</label>
+                                        <select class="setting-input">
+                                            <option value="daily" selected>매일</option>
+                                            <option value="weekly">매주</option>
+                                            <option value="monthly">매월</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>백업 보관 기간 (일)</label>
+                                        <input type="number" value="30" class="setting-input">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>마지막 백업</label>
+                                        <span class="setting-value">2024-01-15 03:00:00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="app-body-sidebar">
+            <section class="alerts-section">
+                <h3>실시간 알림</h3>
+                <div class="alerts-list">
+                    <div class="alert-item urgent">
+                        <div class="alert-icon">
+                            <i class="ph-warning"></i>
+                        </div>
+                    </div>
+                    <div class="alert-item normal">
+                        <div class="alert-icon">
+                            <i class="ph-info"></i>
+                        </div>
+                        <div class="alert-content">
+                            <h4>대용량 거래 완료</h4>
+                            <p>이○○ 고객의 5천만원 거래가 정상 완료되었습니다.</p>
+                            <span class="alert-time">15분 전</span>
+                        </div>
+                    </div>
+                    <div class="alert-item normal">
+                        <div class="alert-icon">
+                            <i class="ph-check-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <h4>시스템 점검 완료</h4>
+                            <p>오후 2시 정기 점검이 정상 완료되었습니다.</p>
+                            <span class="alert-time">1시간 전</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quick-actions">
+                <h3>빠른 작업</h3>
+                <div class="action-buttons">
+                    <button class="action-btn">
+                        <i class="ph-download"></i>
+                        데이터 다운로드
+                    </button>
+                    <button class="action-btn">
+                        <i class="ph-file-text"></i>
+                        보고서 생성
+                    </button>
+                    <button class="action-btn">
+                        <i class="ph-chart-bar"></i>
+                        통계 분석
+                    </button>
+                    <button class="action-btn">
+                        <i class="ph-gear"></i>
+                        설정
+                    </button>
+                </div>
+            </section>
+
+            <section class="system-status">
+                <h3>시스템 상태</h3>
+                <div class="status-items">
+                    <div class="status-item">
+                        <span class="status-label">서버 상태</span>
+                        <span class="status-value success">정상</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">DB 연결</span>
+                        <span class="status-value success">정상</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">API 응답</span>
+                        <span class="status-value warning">지연</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">보안 상태</span>
+                        <span class="status-value success">안전</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="/js/widrawl.js"></script>
+</body>
+</html>
