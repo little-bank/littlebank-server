@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -63,5 +65,11 @@ public class AdminChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.delete();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChallengeAdminResponseDto> getAllChallenges(ChallengeCategory challengeCategory) {
+        List<ChallengeAdminResponseDto> response = challengeRepository.getAllChallenges(challengeCategory);
+        return response;
     }
 }

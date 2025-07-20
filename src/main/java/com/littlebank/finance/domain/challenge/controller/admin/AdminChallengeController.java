@@ -1,5 +1,6 @@
 package com.littlebank.finance.domain.challenge.controller.admin;
 
+import com.littlebank.finance.domain.challenge.domain.ChallengeCategory;
 import com.littlebank.finance.domain.challenge.dto.request.admin.ChallengeAdminRequestDto;
 import com.littlebank.finance.domain.challenge.dto.response.admin.ChallengeAdminResponseDto;
 import com.littlebank.finance.domain.challenge.service.admin.AdminChallengeService;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api-admin/challenge")
@@ -48,5 +51,14 @@ public class AdminChallengeController {
     ) {
         adminChallengeService.deleteChallenge(admin.getId(), challengeId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "챌린지 조회")
+    @GetMapping("/get/All")
+    public ResponseEntity<List<ChallengeAdminResponseDto>> getAllChallenge(
+            @RequestParam(required = false)ChallengeCategory challengeCategory
+            ) {
+        List<ChallengeAdminResponseDto> response = adminChallengeService.getAllChallenges(challengeCategory);
+        return ResponseEntity.ok(response);
     }
 }
