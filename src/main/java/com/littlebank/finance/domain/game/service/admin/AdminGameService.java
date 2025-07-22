@@ -3,6 +3,7 @@ package com.littlebank.finance.domain.game.service.admin;
 import com.littlebank.finance.domain.game.domain.Game;
 import com.littlebank.finance.domain.game.domain.repository.GameRepository;
 import com.littlebank.finance.domain.game.dto.request.GameRequestDto;
+import com.littlebank.finance.domain.game.dto.response.GameMainResponseDto;
 import com.littlebank.finance.domain.game.dto.response.GameResponseDto;
 import com.littlebank.finance.domain.game.exception.GameException;
 import com.littlebank.finance.domain.user.domain.User;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -52,5 +55,9 @@ public class AdminGameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new GameException(ErrorCode.GAME_NOT_FOUND));
         gameRepository.deleteById(game.getId());
+    }
+
+    public List<GameMainResponseDto> getAllGames() {
+        return gameRepository.findAllByUserVote();
     }
 }

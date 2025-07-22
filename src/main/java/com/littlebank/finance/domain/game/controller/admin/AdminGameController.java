@@ -1,6 +1,7 @@
 package com.littlebank.finance.domain.game.controller.admin;
 
 import com.littlebank.finance.domain.game.dto.request.GameRequestDto;
+import com.littlebank.finance.domain.game.dto.response.GameMainResponseDto;
 import com.littlebank.finance.domain.game.dto.response.GameResponseDto;
 import com.littlebank.finance.domain.game.service.admin.AdminGameService;
 import com.littlebank.finance.global.security.CustomUserDetails;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api-admin/game")
@@ -48,5 +51,12 @@ public class AdminGameController {
     ) {
         adminGameService.deleteGame(gameId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "게임 전체 조회")
+    @GetMapping("/get/All")
+    public ResponseEntity<List<GameMainResponseDto>> getAllGames() {
+        List<GameMainResponseDto> response = adminGameService.getAllGames();
+        return ResponseEntity.ok(response);
     }
 }
