@@ -13,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @Service
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminGameService {
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
+
     public GameResponseDto createGame(Long adminId, GameRequestDto request) {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
@@ -47,5 +46,11 @@ public class AdminGameService {
         game.update(request.getQuestion(), request.getOption_a(), request.getOption_b(), game.getVote_a(), game.getVote_b());
 
         return GameResponseDto.of(game);
+    }
+
+    public void deleteGame(Long gameId) {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new GameException(ErrorCode.GAME_NOT_FOUND));
+        gameRepository.deleteById(game.getId());
     }
 }
