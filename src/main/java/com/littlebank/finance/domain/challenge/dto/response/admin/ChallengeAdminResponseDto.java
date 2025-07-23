@@ -5,14 +5,12 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class ChallengeAdminResponseDto {
 
     private Long id;
     private String title;
-    private String description;
     private String category;
     private String subject;
     private LocalDateTime startDate;

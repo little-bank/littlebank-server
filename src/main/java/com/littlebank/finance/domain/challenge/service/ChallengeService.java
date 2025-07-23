@@ -6,7 +6,6 @@ import com.littlebank.finance.domain.challenge.domain.ChallengeParticipation;
 import com.littlebank.finance.domain.challenge.domain.ChallengeStatus;
 import com.littlebank.finance.domain.challenge.domain.repository.ChallengeParticipationRepository;
 import com.littlebank.finance.domain.challenge.domain.repository.ChallengeRepository;
-import com.littlebank.finance.domain.challenge.domain.repository.ChallengeRepositoryCustom;
 import com.littlebank.finance.domain.challenge.dto.request.ChallengeFinishScoreRequestDto;
 import com.littlebank.finance.domain.challenge.dto.request.ChallengeUserRequestDto;
 import com.littlebank.finance.domain.challenge.dto.response.ChallengeFinishScoreResponseDto;
@@ -19,7 +18,6 @@ import com.littlebank.finance.domain.family.domain.Status;
 import com.littlebank.finance.domain.family.domain.repository.FamilyMemberRepository;
 import com.littlebank.finance.domain.family.domain.repository.FamilyRepository;
 import com.littlebank.finance.domain.family.exception.FamilyException;
-import com.littlebank.finance.domain.mission.exception.MissionException;
 import com.littlebank.finance.domain.notification.domain.Notification;
 import com.littlebank.finance.domain.notification.domain.NotificationType;
 import com.littlebank.finance.domain.notification.domain.repository.NotificationRepository;
@@ -55,7 +53,6 @@ public class ChallengeService {
     private final RedissonClient redissonClient;
     private final ChallengeParticipationRepository challengeParticipationRepository;
     private final FamilyMemberRepository familyMemberRepository;
-    private final ChallengeRepositoryCustom challengeRepositoryCustom;
     private final FamilyRepository familyRepository;
     private final NotificationRepository notificationRepository;
     private final FirebaseService firebaseService;
@@ -161,7 +158,7 @@ public class ChallengeService {
 
         Page<Challenge> challenges;
         if (challengeCategory != null) {
-            challenges = challengeRepositoryCustom.findAllByCategory(challengeCategory, pageable);
+            challenges = challengeRepository.findAllByCategory(challengeCategory, pageable);
         } else {
             challenges = challengeRepository.findByIsDeletedFalse(pageable);
         }
