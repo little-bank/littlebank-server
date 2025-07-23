@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api-admin/survey")
 @Tag(name = "survey")
@@ -48,5 +50,12 @@ public class AdminSurveyController {
     ) {
         adminSurveyService.deleteSurvey(surveyId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "설문 조회")
+    @GetMapping("/get/All")
+    public ResponseEntity<List<CreateSurveyResponseDto>> getAllSurveys() {
+        List<CreateSurveyResponseDto> response = adminSurveyService.getAllSurveys();
+        return ResponseEntity.ok(response);
     }
 }
