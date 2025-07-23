@@ -5,6 +5,7 @@ import com.littlebank.finance.domain.survey.dto.response.CreateSurveyResponseDto
 import com.littlebank.finance.domain.survey.service.admin.AdminSurveyService;
 import com.littlebank.finance.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +38,15 @@ public class AdminSurveyController {
     ) {
         CreateSurveyResponseDto response = adminSurveyService.updateSurvey(admin.getId(), surveyId, request);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "설문 삭제")
+    @DeleteMapping("/delete/{surveyId}")
+    public ResponseEntity<Void> deleteSurvey (
+            @Parameter(description = "삭제할 설문 식별 id")
+            @PathVariable("surveyId") Long surveyId
+    ) {
+        adminSurveyService.deleteSurvey(surveyId);
+        return ResponseEntity.noContent().build();
     }
 }

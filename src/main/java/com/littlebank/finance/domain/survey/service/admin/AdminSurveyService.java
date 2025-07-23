@@ -38,4 +38,10 @@ public class AdminSurveyService {
         survey.update(request.getQuestion(), request.getOptionA(), request.getOptionB(), request.getOptionC());
         return CreateSurveyResponseDto.of(survey);
     }
+
+    public void deleteSurvey(Long surveyId) {
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new SurveyException(ErrorCode.SURVEY_NOT_FOUND));
+    surveyRepository.deleteById(survey.getId());
+    }
 }
