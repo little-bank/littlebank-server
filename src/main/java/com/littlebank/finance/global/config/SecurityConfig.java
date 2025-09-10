@@ -48,7 +48,9 @@ public class SecurityConfig {
             // view
             "/view/public/**", "/view/**", "/css/**", "/consents/**",
             // view-link-page
-            "/deeplink/invite"
+            "/deeplink/invite",
+            // admin
+            "/admin/**", "/js/**", "/logos/**", "/favicon.ico", "/admin-login"
     };
 
     @Bean
